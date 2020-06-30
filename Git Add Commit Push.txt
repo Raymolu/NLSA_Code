@@ -1,0 +1,23 @@
+#Start the git command prompt
+
+#Morning if working with others or new setup
+cd C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis
+git pull
+
+#Username if needed
+Raymolu
+
+#End of the day commit + Push
+cd C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis
+git add .
+git commit -m "End of task update"
+git push
+
+
+
+
+
+#Create a new branch to work on.
+# Then add this after the cd command
+git checkout SnowFlake0
+

@@ -1,0 +1,173 @@
+<<<<<<< HEAD
+open Anaconda console
+Activate environment (Snowflake2)
+
+change directory
+cd folder were the py files are
+
+#Standard build (No spec files)
+pyinstaller.exe --onefile --windowed app.py
+
+
+#When the app needs to read files
+You create a spec file using this command:
+
+    pyi-makespec options name.py [other scripts …]
+
+The options are the same options documented above for the pyinstaller command. This command creates the name.spec file but does not go on to build the executable.
+
+#example
+(snowflake2) C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis\Functions>
+
+pyinstaller.exe --onefile --windowed pyi-makespec NordicLamSplitAnalysisInterface.py
+
+or
+
+pyinstaller.exe --onefile --windowed --paths=C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis\Functions --paths=C:\Users\ludovikraymond\AppData\Local\Continuum\anaconda3 pyi-makespec NordicLamSplitAnalysisInterface.py
+
+
+#Edit spec file:
+
+# -*- mode: python -*-
+
+block_cipher = None
+
+
+a = Analysis(['NordicLamSplitAnalysisInterface.py'],
+             pathex=['C:\\Nordic\\Projets\\ProgramationDivers\\NordicLamSplitAnalysis\\Functions','C:\\Users\\ludovikraymond\\AppData\\Local\\Continuum\\anaconda3'],
+             binaries=[],
+             datas=[('NordicLamSpecs.xlsx', '.')],
+             hiddenimports=['pandas._libs.tslibs.timedeltas', 'pandas._libs.tslibs.np_datetime', 'pandas._libs.tslibs.nattype', 'pandas._libs.skiplist'],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
+exe = EXE(pyz,
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          name='NLSAnalyzer',
+          debug=False,
+          strip=False,
+          upx=True,
+          runtime_tmpdir=None,
+          console=True )
+
+Packages directory for Snowflake2 environment:
+C:\Users\ludovikraymond\AppData\Local\Continuum\anaconda3
+
+
+C:\Users\ludovikraymond\AppData\Local\Continuum\anaconda3\pkgs\pyinstaller-3.3.1-py36_vc14_0\Lib\site-packages\PyInstaller\hooks
+
+#If import fail on a module see what hooks need to be added manualy
+items needed to be added to the 'hook-pandas.py'. Such as shown at This Link.
+For my code to work, I had to edit my 'hook-pandas.py' to the following:
+
+Add the following to the spc file:
+hiddenimports = ['pandas._libs.tslibs.timedeltas', 'pandas._libs.tslibs.np_datetime', 'pandas._libs.tslibs.nattype', 'pandas._libs.skiplist']
+
+
+
+#run in anaconda console:
+Use the moste optimal environment. (try TestSizePip2)
+
+pyinstaller.exe ScriptNL.spec
+pyinstaller.exe ScriptBuilder.spec
+pyinstaller ScriptBuilder_2.spec
+
+cd C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis\Code
+pyinstaller ScriptBuilder_6_4_2.spec
+
+
+=======
+open Anaconda console
+Activate environment (Snowflake2)
+
+change directory
+cd folder were the py files are
+
+#Standard build (No spec files)
+pyinstaller.exe --onefile --windowed app.py
+
+
+#When the app needs to read files
+You create a spec file using this command:
+
+    pyi-makespec options name.py [other scripts …]
+
+The options are the same options documented above for the pyinstaller command. This command creates the name.spec file but does not go on to build the executable.
+
+#example
+(snowflake2) C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis\Functions>
+
+pyinstaller.exe --onefile --windowed pyi-makespec NordicLamSplitAnalysisInterface.py
+
+or
+
+pyinstaller.exe --onefile --windowed --paths=C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis\Functions --paths=C:\Users\ludovikraymond\AppData\Local\Continuum\anaconda3 pyi-makespec NordicLamSplitAnalysisInterface.py
+
+
+#Edit spec file:
+
+# -*- mode: python -*-
+
+block_cipher = None
+
+
+a = Analysis(['NordicLamSplitAnalysisInterface.py'],
+             pathex=['C:\\Nordic\\Projets\\ProgramationDivers\\NordicLamSplitAnalysis\\Functions','C:\\Users\\ludovikraymond\\AppData\\Local\\Continuum\\anaconda3'],
+             binaries=[],
+             datas=[('NordicLamSpecs.xlsx', '.')],
+             hiddenimports=['pandas._libs.tslibs.timedeltas', 'pandas._libs.tslibs.np_datetime', 'pandas._libs.tslibs.nattype', 'pandas._libs.skiplist'],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
+exe = EXE(pyz,
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          name='NLSAnalyzer',
+          debug=False,
+          strip=False,
+          upx=True,
+          runtime_tmpdir=None,
+          console=True )
+
+Packages directory for Snowflake2 environment:
+C:\Users\ludovikraymond\AppData\Local\Continuum\anaconda3
+
+
+C:\Users\ludovikraymond\AppData\Local\Continuum\anaconda3\pkgs\pyinstaller-3.3.1-py36_vc14_0\Lib\site-packages\PyInstaller\hooks
+
+#If import fail on a module see what hooks need to be added manualy
+items needed to be added to the 'hook-pandas.py'. Such as shown at This Link.
+For my code to work, I had to edit my 'hook-pandas.py' to the following:
+
+Add the following to the spc file:
+hiddenimports = ['pandas._libs.tslibs.timedeltas', 'pandas._libs.tslibs.np_datetime', 'pandas._libs.tslibs.nattype', 'pandas._libs.skiplist']
+
+
+
+#run in anaconda console:
+Use the moste optimal environment. (try TestSizePip2)
+
+pyinstaller.exe ScriptNL.spec
+pyinstaller.exe ScriptBuilder.spec
+pyinstaller ScriptBuilder_2.spec
+
+cd C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis\Code
+pyinstaller ScriptBuilder_6_4_2.spec
+
+
+>>>>>>> 3be3cb1c1744d355d05ff23bf1db2074bf1a4bcf
