@@ -46,7 +46,6 @@ def B_Eval(Mf,Mr,hd,h):
 
 
 #Evaluate the Beam residual shear resistance
-#def S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,BP,Wf,Wr,ShearA):    
 def S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):    
     """
         Nordic-Lam Type based on CSA 086-14
@@ -96,7 +95,6 @@ def S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):
 
 
 #Perpendicular to grain tension calculation
-#def P_Tension(NLType,h,b,hd,Vf,Mf,Ply,BP):
 def P_Tension(NLType,h,b,hd,Vf,Mf,Ply):
     """
         h: from 9.5" to 16" (Height), mm
@@ -165,7 +163,6 @@ def B700_Eval(Mf,Mr,hd,h):
         Eval = 99999        
     return Eval, CMr
 
-#def S700_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,BP,Wf,Wr,ShearA):   
 def S700_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):   
     if (hd <= 2/3*h and h <= Maxh and b <= Maxb):
         # Use equation (a) or (b) methodes

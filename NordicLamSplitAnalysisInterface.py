@@ -10,9 +10,11 @@ from tkinter import messagebox
 import os
 import NordicLamSplitAnalysisFunctions as fu
 import NordicLamSplitRepairFunctions as Rfu
-import UnitConversion as UC
 from UnitConversion import convert
 import Report as Re
+
+icon = 'nordic_N.ico' #For exe version
+
 
 class MainInt:
         def __init__(self, master): #Calls the user interface
@@ -449,6 +451,13 @@ class MainInt:
             
 #-_-#       # create a dictionary with all the data as dictionary. {'Mf': {'imperial_unit':2222, 'lbft','metric_unit':3333, 'Nm'}}
             # Get the utility function to create dictionaries.
+
+            result_dico_Key_list = ['Project','Notes','NLType','Ply','b','h','hd',
+                                    'MethodUsed','Mf','Mr','CMr','EvalM',
+                                    'ShearEq','Vf','Wf','Wr','CShearRes','EvalV',
+                                    'KD','KH','Ftp','FtpRes','Evaltp','FtpN','Fv']
+
+
         
             return Project,Notes,NLType,Ply,b,h,hd,MethodUsed,Mf,Mr,CMr,EvalM,ShearEq,Vf,Wf,Wr,CShearRes,EvalV,KD,KH,Ftp,FtpRes,Evaltp,FtpN,Fv
 
@@ -784,4 +793,5 @@ class MainInt:
 
 root = Tk()
 GUI = MainInt(root)
+root.iconbitmap(icon)
 root.mainloop()            

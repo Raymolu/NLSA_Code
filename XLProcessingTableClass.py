@@ -17,9 +17,9 @@ class XLTable:
 
     #Transfer Excel file to pandas dataframe. Note: xls file and python or exe file need to be in the same folder.
     def XLToTable(self):  
-        if self.KeyQty is 1:
+        if self.KeyQty == 1:
             TbDataFrame = pd.read_excel(self.FileName, sheet_name=0, header=3, index_col=0)
-        elif self.KeyQty is 2:
+        elif self.KeyQty == 2:
             TbDataFrame = pd.read_excel(self.FileName, sheet_name=0, header=3, index_col=[0,1])
         else:
             print("Enter valid quantity of row index")
@@ -29,10 +29,10 @@ class XLTable:
     def SeriesName(self):
         RawSeriesName = self.XLToTable().index.tolist()[0:-1]
         SeriesName=[]
-        if self.KeyQty is 2:
+        if self.KeyQty == 2:
             for i in RawSeriesName:
                 SeriesName+=[str(i[0])+" "+str(i[1])]  
-        elif self.KeyQty is 1:
+        elif self.KeyQty == 1:
             SeriesName = self.XLToTable().index.tolist()[0:-1]
         return SeriesName
     
