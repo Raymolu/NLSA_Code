@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jan 24 13:06:54 2019
+Major revision on June 30th 2020
 V 6.04 (2019-04-04)
 @author: ludovicraymond
 """
