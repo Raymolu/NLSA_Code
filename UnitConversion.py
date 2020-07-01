@@ -6,7 +6,9 @@ V 6.04 (2019-04-04)
 @author: ludovicraymond
 """
 def convert(Val1,Unit1,Unit2):
-    if Unit1 == 'in' and Unit2 == 'mm':
+    if Val1 == None:
+        Val2 = None
+    elif Unit1 == 'in' and Unit2 == 'mm':
         Val2 = Val1 * 25.4
     elif Unit1 == 'mm' and Unit2 == 'in':
         Val2 = Val1 / 25.4
@@ -30,7 +32,13 @@ def convert(Val1,Unit1,Unit2):
         Val2 = Val1 * 20885.46
     elif Unit1 == 'psf' and Unit2 == 'MPa':
         Val2 = Val1 / 20885.46
+    elif Unit1 == 'MPa' and Unit2 == 'psi':
+        Val2 = Val1 * 145.038
+    elif Unit1 == 'psi' and Unit2 == 'MPa':
+        Val2 = Val1 / 145.038
+    elif Unit1 == None and Unit2 == None:
+        Val2 = Val1
     else:
         Val2 = None
-        raise ValueError('Units unsupported by this function')
+        print('Units unsupported by this function')
     return Val2

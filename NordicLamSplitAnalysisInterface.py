@@ -4,14 +4,18 @@ Created on Fri Jan 18 11:17:39 2019
 V 6.04 (2019-04-04)
 @author: ludovicraymond
 """
-from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
+#from tkinter import *
+from tkinter import (Label, Entry, Text, ttk, messagebox,
+                     Checkbutton, StringVar, Radiobutton,
+                     Button, END, Toplevel, Tk)
+#from tkinter import ttk
+#from tkinter import messagebox
 import os
 import NordicLamSplitAnalysisFunctions as fu
 import NordicLamSplitRepairFunctions as Rfu
 from UnitConversion import convert
 import Report as Re
+import math as math
 
 icon = 'nordic_N.ico' #For exe version
 
@@ -22,39 +26,46 @@ class MainInt:
             PowerUser = 'ludovicraymond'
             self.master = master
             self.In=str()
-            self.Unit = StringVar()
-            self.Method = StringVar()
+            self.selected_unit = StringVar()
+            self.selected_calc_method = StringVar()
             self.Reinforce = StringVar()
-            self.ShearA = StringVar() 
+            self.shear_method_a_used = StringVar() 
             self.ScrewOri = StringVar()
             self.UnitDict = {}
             self.Units = ['Imperial','Metric']
-            self.Methods = ['CSA & Euro','APA 700']
+            self.calc_methods = ['CSA & Euro','APA 700']
             self.Reinforces = ['ASSY Screw','Glued Panel']
             self.ScrewOris = ['Same Side','Opposed Side']
-            ValUnit = ['b','h','hd','Mf','Mr','Vf','Max beam length','Wf','Wr']
-            Units = [['in','mm'],['in','mm'],['in','mm'],['lbf-ft','N-m'],['lbf-ft','N-m'],['lbf','N'],['ft','m'],['lbf','N'],['lbf','N']]
+            ValUnit = ['Nordic_Lam_thickness','Nordic_Lam_depth','hole_diameter',
+                       'bending_force_Mf','bending_resistance_Mr','shear_force_Vf',
+                       'max_beam_length','shear_force_Wf','shear_resistance_Wr']
+            Units = [['in','mm'],['in','mm'],['in','mm'],
+                     ['lbft','Nm'],['lbft','Nm'],['lb','N'],
+                     ['ft','m'],['lb','N'],['lb','N']]
             count=0
-#-_-# Work on the unit dictionary. See what type of units the functions accepts
+
+#-_-# Update all the label text to show the proper wording instead of the variable name.
+### Make sure max_beam_length displays on the interface when calc done
+            
             for i in ValUnit:
                 self.UnitDict[i]=Units[count]
                 count+=1
-            self.bList = []
-            self.hList = []
-            self.Unit.set(self.Units[1])
-            self.Method.set(self.Methods[0])
+            self.Nordic_Lam_thickness_List = []
+            self.Nordic_Lam_depth_List = []
+            self.selected_unit.set(self.Units[1])
+            self.selected_calc_method.set(self.calc_methods[0])
             self.Reinforce.set(self.Reinforces[0])
             self.ScrewOri.set(self.ScrewOris[0])
-            self.ShearA.set(0) 
+            self.shear_method_a_used.set(0) 
             if os.getlogin() == PowerUser:
-                self.Unit.set(self.Units[0])
-            self.Un = 0 if self.Unit.get() == self.Units[0] else 1
-            self.bImp = [1.75, 3.5]
-            self.bMet = [44.45,88.9]
-            self.blist = self.bImp if self.Un == 0 else self.bMet               
-            self.hImp = [9.5, 11.875, 14, 16]
-            self.hMet = [241.3, 301.6, 355.6, 406.4]
-            self.hlist = self.hImp if self.Un == 0 else self.hMet
+                self.selected_unit.set(self.Units[0])
+            self.Un = 0 if self.selected_unit.get() == self.Units[0] else 1
+            self.Nordic_Lam_imperial_thickness_List = [1.75, 3.5]
+            self.Nordic_Lam_metric_thickness_List = [44.45,88.9]
+            self.Nordic_Lam_thickness_List = self.Nordic_Lam_imperial_thickness_List if self.Un == 0 else self.Nordic_Lam_metric_thickness_List               
+            self.Nordic_Lam_imperial_depth_List = [9.5, 11.875, 14, 16]
+            self.Nordic_Lam_metric_depth_List = [241.3, 301.6, 355.6, 406.4]
+            self.Nordic_Lam_depth_List = self.Nordic_Lam_imperial_depth_List if self.Un == 0 else self.Nordic_Lam_metric_depth_List
 
             self.SMLength = "Click analyze"
 
@@ -74,9 +85,9 @@ class MainInt:
             Height = 5
             Anchor = 'e'
             Ro+=1
-            self.LblProject = Label(master, text="Project Name:", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_project_name = Label(master, text="Project Name:", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.LblNotes = Label(master, text="Notes:", anchor = 'ne', width = Width, height = Height).grid(row=Ro, column=Col)  
+            self.label_project_notes = Label(master, text="Notes:", anchor = 'ne', width = Width, height = Height).grid(row=Ro, column=Col)  
             Ro+=4
 #            self.CBB1=Checkbutton(master, text=" Bypass", variable=self.ByPass, anchor = Anchor, width = Width-4).grid(row=Ro, column=Col)
             
@@ -87,65 +98,65 @@ class MainInt:
             Height = 5
             Anchor = 'e'
             Ro+=1
-            self.InputProject = Entry(master, font = "Arial 8 bold", width = 60)
-            self.InputProject.grid(row=Ro, column=Col, columnspan=2, sticky='w')
+            self.input_project_name = Entry(master, font = "Arial 8 bold", width = 60)
+            self.input_project_name.grid(row=Ro, column=Col, columnspan=2, sticky='w')
             Ro+=1
-            self.InputNotes = Text(master, font = "Arial 8", width = Width, height = Height)
-            self.InputNotes.grid(row=Ro, column=Col, columnspan=6, sticky=Anchor)
+            self.Input_project_notes = Text(master, font = "Arial 8", width = Width, height = Height)
+            self.Input_project_notes.grid(row=Ro, column=Col, columnspan=6, sticky=Anchor)
             Width = 15
             Ro+=1
             self.LblHead2 = Label(master, text="User Input").grid(row=Ro, column=Col)
             Ro+=1
-            self.Input1 = ttk.Combobox(master, values=(fu.tbNL.SeriesName()),width=Width)
-            self.Input1.grid(row=Ro, column=Col)
-            self.Input1.insert(0,fu.tbNL.SeriesName()[1])
+            self.input_Nordic_Lam_type_1 = ttk.Combobox(master, values=(fu.tbNL.SeriesName()),width=Width)
+            self.input_Nordic_Lam_type_1.grid(row=Ro, column=Col)
+            self.input_Nordic_Lam_type_1.insert(0,fu.tbNL.SeriesName()[1])
             Ro+=1            
-            self.Input1_1 = ttk.Combobox(master, values=(1,2,3,4),width=Width)
-            self.Input1_1.grid(row=Ro, column=Col)
-            self.Input1_1.insert(0,1)
+            self.input_Nordic_Lam_ply_quantity_1_1 = ttk.Combobox(master, values=(1,2,3,4),width=Width)
+            self.input_Nordic_Lam_ply_quantity_1_1.grid(row=Ro, column=Col)
+            self.input_Nordic_Lam_ply_quantity_1_1.insert(0,1)
             Ro+=1            
-            self.Input2 = ttk.Combobox(master, values=(self.blist),width=Width)
-            self.Input2.grid(row=Ro, column=Col)
-            self.Input2.insert(0,self.blist[0])
+            self.input_Nordic_Lam_thickness_2 = ttk.Combobox(master, values=(self.Nordic_Lam_thickness_List),width=Width)
+            self.input_Nordic_Lam_thickness_2.grid(row=Ro, column=Col)
+            self.input_Nordic_Lam_thickness_2.insert(0,self.Nordic_Lam_thickness_List[0])
             Ro+=1            
-            self.Input3 = ttk.Combobox(master, values=(self.hlist),width=Width)
-            self.Input3.grid(row=Ro, column=Col)
-            self.Input3.insert(0,self.hlist[1])
+            self.input_Nordic_Lam_depth_3 = ttk.Combobox(master, values=(self.Nordic_Lam_depth_List),width=Width)
+            self.input_Nordic_Lam_depth_3.grid(row=Ro, column=Col)
+            self.input_Nordic_Lam_depth_3.insert(0,self.Nordic_Lam_depth_List[1])
             Ro+=1            
-            self.Input4 = Entry(master, width = Width+3)
-            self.Input4.grid(row=Ro, column=Col)
-            if self.Unit.get() == self.Units[0]:
-                self.Input4.insert(0,4)
+            self.input_hole_diameter_4 = Entry(master, width = Width+3)
+            self.input_hole_diameter_4.grid(row=Ro, column=Col)
+            if self.selected_unit.get() == self.Units[0]:
+                self.input_hole_diameter_4.insert(0,4)
             else:
-                self.Input4.insert(0,25.4)
+                self.input_hole_diameter_4.insert(0,25.4)
             Ro+=1            
-            self.Input5 = Entry(master, width = Width+3)
-            self.Input5.grid(row=Ro, column=Col)
+            self.input_bending_force_Mf_5 = Entry(master, width = Width+3)
+            self.input_bending_force_Mf_5.grid(row=Ro, column=Col)
             Ro+=1            
-            self.Input6 = Entry(master, width = Width+3)
-            self.Input6.grid(row=Ro, column=Col)
+            self.input_bending_resistance_Mr_6 = Entry(master, width = Width+3)
+            self.input_bending_resistance_Mr_6.grid(row=Ro, column=Col)
             Ro+=1            
-            self.Input7 = Entry(master, width = Width+3)
-            self.Input7.grid(row=Ro, column=Col)
+            self.input_shear_force_Vf_7 = Entry(master, width = Width+3)
+            self.input_shear_force_Vf_7.grid(row=Ro, column=Col)
             Ro+=1            
-            self.Input8 = ttk.Combobox(master, values=(0.65, 1.00, 1.15),width=Width)
-            self.Input8.grid(row=Ro, column=Col)
-            self.Input8.insert(0,1.00)
+            self.input_K_D_8 = ttk.Combobox(master, values=(0.65, 1.00, 1.15),width=Width)
+            self.input_K_D_8.grid(row=Ro, column=Col)
+            self.input_K_D_8.insert(0,1.00)
             Ro+=1            
-            self.Input9 = ttk.Combobox(master, values=(1.00, 1.10),width=Width)
-            self.Input9.grid(row=Ro, column=Col)
-            self.Input9.insert(0,1.00)
+            self.input_K_H_9 = ttk.Combobox(master, values=(1.00, 1.10),width=Width)
+            self.input_K_H_9.grid(row=Ro, column=Col)
+            self.input_K_H_9.insert(0,1.00)
             Ro+=1
             self.ShearMaxLength = StringVar() 
             self.OutShearMaxLength = Label(master, textvariable=self.ShearMaxLength, width = Width).grid(row=Ro, column=Col)
             Ro+=1            
-            self.CBB2=Checkbutton(master, text=" Use shear equation 7.5.7.2 (a)", variable=self.ShearA).grid(row=Ro, column=Col, columnspan = 2)
+            self.CBB2=Checkbutton(master, text=" Use shear equation 7.5.7.2 (a)", variable=self.shear_method_a_used).grid(row=Ro, column=Col, columnspan = 2)
             Ro+=1            
-            self.Input10 = Entry(master, width = Width+3)
-            self.Input10.grid(row=Ro, column=Col)
+            self.input_shear_force_Wf_10 = Entry(master, width = Width+3)
+            self.input_shear_force_Wf_10.grid(row=Ro, column=Col)
             Ro+=1            
-            self.Input11 = Entry(master, width = Width+3)
-            self.Input11.grid(row=Ro, column=Col)
+            self.input_shear_resistance_Wr_11 = Entry(master, width = Width+3)
+            self.input_shear_resistance_Wr_11.grid(row=Ro, column=Col)
 
         #Column 2 Input Labels
             Col += 1
@@ -157,70 +168,70 @@ class MainInt:
             Ro+=1
             self.LblHead1 = Label(master, text="Nordic Lam information", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.LblInput1 = Label(master, text="Nordic Lam Type (NPG = Architectural)", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.Lbl_input_Nordic_Lam_type_1 = Label(master, text="Nordic Lam Type (NPG = Architectural)", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.LblInput1_1 = Label(master, text="Number of plies", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.Lbl_input_Nordic_Lam_ply_quantity_1_1 = Label(master, text="Number of plies", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
             self.LblInput2Txt = StringVar()
             self.LblInput2 = Label(master, textvariable=self.LblInput2Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.ID2 = 'b'
+            self.ID2 = 'Nordic_Lam_thickness'
             self.Lbl2 = self.ID2+", Nordic Lam  single ply width, "
             self.LblInput2Txt.set(self.Lbl2+self.UnitDict[self.ID2][self.Un])
             Ro+=1
-            self.LblInput3Txt = StringVar()
-            self.LblInput3 = Label(master, textvariable=self.LblInput3Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.ID3 = 'h'
+            self.Lbl_input_Nordic_Lam_depth_3_Txt = StringVar()
+            self.Lbl_input_Nordic_Lam_depth_3 = Label(master, textvariable=self.Lbl_input_Nordic_Lam_depth_3_Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.ID3 = 'Nordic_Lam_depth'
             self.Lbl3 = self.ID3+", Nordic Lam  depth, "
-            self.LblInput3Txt.set(self.Lbl3+self.UnitDict[self.ID3][self.Un])
+            self.Lbl_input_Nordic_Lam_depth_3_Txt.set(self.Lbl3+self.UnitDict[self.ID3][self.Un])
             Ro+=1 
-            self.LblInput4Txt = StringVar()
-            self.LblInput4 = Label(master, textvariable=self.LblInput4Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.ID4 = 'hd'
+            self.label_input_hole_diameter_4_text = StringVar()
+            self.label_input_hole_diameter_4 = Label(master, textvariable=self.label_input_hole_diameter_4_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.ID4 = 'hole_diameter'
             self.Lbl4 = self.ID4+", Hole diameter, "
-            self.LblInput4Txt.set(self.Lbl4+self.UnitDict[self.ID4][self.Un])
+            self.label_input_hole_diameter_4_text.set(self.Lbl4+self.UnitDict[self.ID4][self.Un])
             Ro+=1 
-            self.LblInput5Txt = StringVar()
-            self.LblInput5 = Label(master, textvariable=self.LblInput5Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.ID5 = 'Mf'
+            self.label_input_bending_force_Mf_5_text = StringVar()
+            self.label_input_bending_force_Mf_5 = Label(master, textvariable=self.label_input_bending_force_Mf_5_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.ID5 = 'bending_force_Mf'
             self.Lbl5 = self.ID5+", Moment force at opening, "
-            self.LblInput5Txt.set(self.Lbl5+self.UnitDict[self.ID5][self.Un])
+            self.label_input_bending_force_Mf_5_text.set(self.Lbl5+self.UnitDict[self.ID5][self.Un])
             Ro+=1
-            self.LblInput6Txt = StringVar()
-            self.LblInput6 = Label(master, textvariable=self.LblInput6Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.ID6 = 'Mr'
+            self.label_input_bending_resistance_Mr_6_text = StringVar()
+            self.label_input_bending_resistance_Mr_6 = Label(master, textvariable=self.label_input_bending_resistance_Mr_6_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.ID6 = 'bending_resistance_Mr'
             self.Lbl6 = self.ID6+", Full section moment resistance, "
-            self.LblInput6Txt.set(self.Lbl6+self.UnitDict[self.ID6][self.Un])
+            self.label_input_bending_resistance_Mr_6_text.set(self.Lbl6+self.UnitDict[self.ID6][self.Un])
             Ro+=1
-            self.LblInput7Txt = StringVar()
-            self.LblInput7 = Label(master, textvariable=self.LblInput7Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.ID7 = 'Vf'
+            self.label_input_shear_force_Vf_7_text = StringVar()
+            self.label_input_shear_force_Vf_7 = Label(master, textvariable=self.label_input_shear_force_Vf_7_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.ID7 = 'shear_force_Vf'
             self.Lbl7 = self.ID7+", Longitudinal shear 7.5.7.2 (b), "
-            self.LblInput7Txt.set(self.Lbl7+self.UnitDict[self.ID7][self.Un])
+            self.label_input_shear_force_Vf_7_text.set(self.Lbl7+self.UnitDict[self.ID7][self.Un])
             Ro+=1
-            self.LblInput8 = Label(master, text="KD, duration factor", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_K_D_8 = Label(master, text="KD, duration factor", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.LblInput9 = Label(master, text="KH, humidity factor", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_K_H_9 = Label(master, text="KH, humidity factor", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
 #            self.LblOutShearMaxLength = Label(master, text=" Max beam length to use 7.5.7.2 (b), m", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             self.LblOutShearMaxLengthTxt = StringVar()
             self.LblOutShearMaxLength = Label(master, textvariable=self.LblOutShearMaxLengthTxt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.IDOutShearMaxLength = 'Max beam length'
+            self.IDOutShearMaxLength = 'max_beam_length'
             self.LblShearMaxLength = self.IDOutShearMaxLength+" to use 7.5.7.2 (b), "
             self.LblOutShearMaxLengthTxt.set(self.LblShearMaxLength+self.UnitDict[self.IDOutShearMaxLength][self.Un])
             Ro+=2
-#            self.LblInput10 = Label(master, text="Wf, shear force, equation 7.5.7.2 (a), N", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.LblInput10Txt = StringVar()
-            self.LblInput10 = Label(master, textvariable=self.LblInput10Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.ID10 = 'Wf'
+#            self.label_input_shear_force_Wf_10 = Label(master, text="Wf, shear force, equation 7.5.7.2 (a), N", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_shear_force_Wf_10_text = StringVar()
+            self.label_input_shear_force_Wf_10 = Label(master, textvariable=self.label_input_shear_force_Wf_10_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.ID10 = 'shear_force_Wf'
             self.Lbl10 = self.ID10+", Longitudinal shear 7.5.7.2 (a), "
-            self.LblInput10Txt.set(self.Lbl10+self.UnitDict[self.ID10][self.Un])
+            self.label_input_shear_force_Wf_10_text.set(self.Lbl10+self.UnitDict[self.ID10][self.Un])
             Ro+=1
-#            self.LblInput11 = Label(master, text="Wr, shear resistance, equation 7.5.7.2 (a), N", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.LblInput11Txt = StringVar()
-            self.LblInput11 = Label(master, textvariable=self.LblInput11Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
-            self.ID11 = 'Wr'
+#            self.label_input_shear_resistance_Wr_11 = Label(master, text="Wr, shear resistance, equation 7.5.7.2 (a), N", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_shear_resistance_Wr_11_text = StringVar()
+            self.label_input_shear_resistance_Wr_11 = Label(master, textvariable=self.label_input_shear_resistance_Wr_11_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.ID11 = 'shear_resistance_Wr'
             self.Lbl11 = self.ID11+", Shear resistance 7.5.7.2 (a), "
-            self.LblInput11Txt.set(self.Lbl11+self.UnitDict[self.ID11][self.Un])
+            self.label_input_shear_resistance_Wr_11_text.set(self.Lbl11+self.UnitDict[self.ID11][self.Un])
 
         #Column 3 Output labels
             Col += 1
@@ -242,8 +253,8 @@ class MainInt:
             Ro+=3
             self.LblHead4 = Label(master, text="Force").grid(row=Ro, column=Col)
             Ro+=1
-            self.Out401Mf = StringVar()
-            self.Out401 = Label(master, textvariable=self.Out401Mf, width = Width).grid(row=Ro, column=Col)
+            self.Out401bending_force_Mf = StringVar()
+            self.Out401 = Label(master, textvariable=self.Out401bending_force_Mf, width = Width).grid(row=Ro, column=Col)
             Ro+=1
             self.Out402Vf = StringVar()
             self.Out402 = Label(master, textvariable=self.Out402Vf, width = Width).grid(row=Ro, column=Col)
@@ -253,13 +264,13 @@ class MainInt:
             
             Ro+=2
             Anchor = 'w'
-            self.RB1=Radiobutton(master, text=self.Units[0], variable=self.Unit, value=self.Units[0], command=self.Radio, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB1=Radiobutton(master, text=self.Units[0], variable=self.selected_unit, value=self.Units[0], command=self.Radio, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.RB2=Radiobutton(master, text=self.Units[1], variable=self.Unit, value=self.Units[1], command=self.Radio, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB2=Radiobutton(master, text=self.Units[1], variable=self.selected_unit, value=self.Units[1], command=self.Radio, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=2
-            self.RB4=Radiobutton(master, text=self.Methods[0], variable=self.Method, value=self.Methods[0], command = lambda : print(self.Method.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB4=Radiobutton(master, text=self.calc_methods[0], variable=self.selected_calc_method, value=self.calc_methods[0], command = lambda : print(self.selected_calc_method.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.RB5=Radiobutton(master, text=self.Methods[1], variable=self.Method, value=self.Methods[1], command = lambda : print(self.Method.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB5=Radiobutton(master, text=self.calc_methods[1], variable=self.selected_calc_method, value=self.calc_methods[1], command = lambda : print(self.selected_calc_method.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=2
             self.RB7=Radiobutton(master, text=self.Reinforces[0], variable=self.Reinforce, value=self.Reinforces[0], command = lambda : print(self.Reinforce.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
@@ -317,8 +328,8 @@ class MainInt:
             self.Button4 = Button(master, text='Reinforce', command=self.Reinforcement, width = Width).grid(row=Ro, column=Col)
             
             if os.getlogin() == PowerUser:
-                self.Input1.delete(0,END)
-                self.Input1.insert(0,fu.tbNL.SeriesName()[0])
+                self.input_Nordic_Lam_type_1.delete(0,END)
+                self.input_Nordic_Lam_type_1.insert(0,fu.tbNL.SeriesName()[0])
                 self.Reinforce.set(self.Reinforces[1])
 
             
@@ -329,103 +340,267 @@ class MainInt:
             Re.os.startfile('NLSA_Reference.pdf')     
 
         def InputProcess(self):
-            print(str(Re.datetime.datetime.fromtimestamp(Re.time.time()).strftime('%Y%m%d_%H:%M and %Ssec')),'---------------------------------------------------------------------------------------')
+            print(str(Re.datetime.datetime.fromtimestamp(
+                    Re.time.time()).strftime('%Y%m%d_%H:%M and %Ssec')),
+                    '---------------------------------------------------------------------------------------')
 
-#            ByPass= int(self.ByPass.get())
-            ShearA= int(self.ShearA.get())            
-            NLType = self.Input1.get()
-            Project = self.InputProject.get()
-            Notes = self.InputNotes.get(0.0,"end-1c") 
-            Unit = self.Unit.get()
-            self.Un = 0 if self.Unit.get() == 'Imperial' else 1
-            List = [self.Input1_1.get(),self.Input2.get(),self.Input3.get(),
-                     self.Input4.get(),self.Input5.get(),self.Input6.get(),
-                     self.Input7.get(),self.Input8.get(),self.Input9.get()]
+            # Start validation of data #
+            shear_method_a_used= int(self.shear_method_a_used.get()) # See if we can remove this one            
+            selected_unit_index = self.Units.index(self.selected_unit.get())
+            selected_unit = self.selected_unit.get().lower()
+            other_unit_index = 1 if selected_unit_index == 0 else 0 # delete
+            other_unit = self.Units[other_unit_index].lower() # delete
+            selected_calc_method = self.selected_calc_method.get()
+            self.Un = selected_unit_index #to update with selected_unit_index and remove remove???
+###-_- -L            
             
-            #Add the Shear values if shear equation (a) is used
-            if ShearA == 1:
-                List = List + [self.Input10.get(),self.Input11.get()]
-            else:
-                List = List + [0, 0]
             
-            Index = 0
-            for i in List:
+            numerical_input_dico = {
+                            'Nordic_Lam_ply_quantity': self.input_Nordic_Lam_ply_quantity_1_1.get(),
+                            'Nordic_Lam_thickness': self.input_Nordic_Lam_thickness_2.get(),
+                            'Nordic_Lam_depth': self.input_Nordic_Lam_depth_3.get(),
+                            'hole_diameter': self.input_hole_diameter_4.get(),
+                            'bending_force_Mf': self.input_bending_force_Mf_5.get(),
+                            'bending_resistance_Mr': self.input_bending_resistance_Mr_6.get(),
+                            'shear_force_Vf': self.input_shear_force_Vf_7.get(),
+                            'K_D': self.input_K_D_8.get(),
+                            'K_H': self.input_K_H_9.get()                            
+                            }
+            
+            if shear_method_a_used == 1:
+                numerical_input_dico['shear_force_Wf'] = (
+                                        self.input_shear_force_Wf_10.get())
+                numerical_input_dico['shear_resistance_Wr'] = (
+                                        self.input_shear_force_Wf_10.get())
+
+            for i in numerical_input_dico: # Validate if items in the list can be converted to float.
                 try:
-                    List[Index] = float(i)
+                    numerical_input_dico[i] = float(numerical_input_dico[i])
                 except:
-                    List[Index] = 0
-                    messagebox.showinfo("Error Message","Please correct the input value: ["+i+"] to a number. (float or integer)")
+                    error_value = numerical_input_dico[i]
+                    numerical_input_dico[i] = 0
+                    messagebox.showinfo(f'Error Message','Please correct the'\
+                    f' input value for the {i} [ {error_value} ] to a number. (float or integer)')
                     print("[",i,"] is not a valid input")
-                Index+=1
-            Ply,b,h,hd,Mf,Mr,Vf,KD,KH,Wf,Wr = List
+            # End validation of data #
             
             # Sets the ply to the lowest int number
-            Ply = Rfu.math.floor(Ply)
+            numerical_input_dico['Nordic_Lam_ply_quantity'] = (
+                    math.floor(numerical_input_dico['Nordic_Lam_ply_quantity']))
 
-            #Convert input from imperial units to international units
-            if Unit == "Imperial":
-                print("The units will be converted from imperial to metric")
-            #Convert input data from imperial to metric to do the function calculations in metric.
-            # Is this if necessary. Old remenant?
-                if self.Unit.get() == 'Imperial':
-                    b,h,hd,Mf,Mr,Vf,Wf,Wr = (convert(b,"in","mm"),convert(h,"in","mm"),
-                                       convert(hd,"in","mm"),convert(Mf,"lbft","Nm"),
-                                       convert(Mr,"lbft","Nm"),convert(Vf,"lb","N"),
-                                       convert(Wf,"lb","N"),convert(Wr,"lb","N"))  
+### Create a imperial and metric dictionaries instead. Base them on a list of keys
+            # have the unit key for all entries. Set it to None if there are no units.
+            
+            first_data_key_list = [
+                            ['project_name',None,None],
+                            ['Notes',None,None],
+                            ['Nordic_Lam_type',None,None],
+                            ['Nordic_Lam_ply_quantity',None,None],
+                            ['selected_calc_method',None,None],
+                            ['shear_method_a_used',None,None],
+                            ['CMr','lbft','Nm'],
+                            ['EvalM',None,None],
+                            ['shear_equation_reference',None,None],
+                            ['CShearRes','lb','N'],
+                            ['EvalV',None,None],
+                            ['K_D',None,None],
+                            ['K_H',None,None],
+                            ['Ftp','psi','MPa'],
+                            ['FtpRes','psi','MPa'],
+                            ['Evaltp',None,None],
+                            ['FtpN','lb','N'],
+                            ['Fv','psi','MPa']
+                            ]
+            
+        
+            
+            self.imperial_data_dico = {}
+            self.metric_data_dico = {}
+            
+            for selected_key in first_data_key_list:
+                self.imperial_data_dico[selected_key[0]] = {'unit':selected_key[1],'value':None}
+                self.metric_data_dico[selected_key[0]] =  {'unit':selected_key[2],'value':None}
+            
+            for selected_dictionary in [self.imperial_data_dico, self.metric_data_dico]:
+                selected_dictionary['project_name']['value'] = self.input_project_name.get()
+                selected_dictionary['Notes']['value'] = self.Input_project_notes.get(0.0,"end-1c")
+                selected_dictionary['Nordic_Lam_type']['value'] = self.input_Nordic_Lam_type_1.get()
+                selected_dictionary['Nordic_Lam_ply_quantity']['value'] = numerical_input_dico['Nordic_Lam_ply_quantity']
+                selected_dictionary['selected_calc_method']['value'] = self.selected_calc_method.get()
+                selected_dictionary['shear_method_a_used']['value'] = int(self.shear_method_a_used.get()) 
+            
+            for selected_key in self.UnitDict:
+                self.imperial_data_dico[selected_key] = {'unit':self.UnitDict[selected_key][0],'value':None}
+                self.metric_data_dico[selected_key] =  {'unit':self.UnitDict[selected_key][1],'value':None}
+
+            for selected_key in numerical_input_dico:
+                if selected_unit == 'imperial':
+                    try:
+                        self.imperial_data_dico[selected_key]['value'] = numerical_input_dico[selected_key]
+                        converted_key_value = convert(numerical_input_dico[selected_key],
+                                                      self.imperial_data_dico[selected_key]['unit'],
+                                                      self.metric_data_dico[selected_key]['unit'])
+                        self.metric_data_dico[selected_key]['value'] = converted_key_value
+                    except:
+                        pass
+                if selected_unit == 'metric':
+                    try:
+                        self.metric_data_dico[selected_key]['value'] = numerical_input_dico[selected_key]
+                        converted_key_value = convert(numerical_input_dico[selected_key],
+                                                      self.metric_data_dico[selected_key]['unit'],
+                                                      self.imperial_data_dico[selected_key]['unit'])
+                        self.imperial_data_dico[selected_key]['value'] = converted_key_value
+                    except:
+                        pass                    
+
             #Generate all the results from the analysis functions based on the method selected.
-            MethodUsed = self.Method.get()
-            if MethodUsed == self.Methods[0]:
-                EvalM, CMr = fu.B_Eval(Mf,Mr,hd,h)
-#                EvalV, CShearRes, Fv = fu.S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,ByPass,Wf,Wr,ShearA)
-                EvalV, CShearRes, Fv = fu.S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA)
-            elif MethodUsed == self.Methods[1]:
-                EvalM, CMr = fu.B700_Eval(Mf,Mr,hd,h)
-#                EvalV, CShearRes, Fv = fu.S700_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,ByPass,Wf,Wr,ShearA)
-                EvalV, CShearRes, Fv = fu.S700_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA)
-#            Evaltp, Ftp, FtpRes, FtpN = fu.P_Tension(NLType,h,b,hd,Vf,convert(Mf,"Nm","Nmm"),Ply,ByPass)            
-            Evaltp, Ftp, FtpRes, FtpN = fu.P_Tension(NLType,h,b,hd,Vf,convert(Mf,"Nm","Nmm"),Ply)            
+            if selected_calc_method == self.calc_methods[0]:
+                bending_evaluation_function = fu.B_Eval
+                shear_evaluation_function = fu.S_Eval
+            
+            elif selected_calc_method == self.calc_methods[1]:
+                bending_evaluation_function = fu.B700_Eval
+                shear_evaluation_function = fu.S700_Eval
+                
+            try:    
+                (self.metric_data_dico['EvalM']['value'],
+                 self.metric_data_dico['CMr']['value']) = (
+                         bending_evaluation_function(
+                            self.metric_data_dico['bending_force_Mf']['value'],
+                            self.metric_data_dico['bending_resistance_Mr']['value'],
+                            self.metric_data_dico['hole_diameter']['value'],
+                            self.metric_data_dico['Nordic_Lam_depth']['value']))
+            except:
+                (self.metric_data_dico['EvalM']['value'],
+                 self.metric_data_dico['CMr']['value']) = (None,)*2
+                print('bending calculations failed to load due to invalid inputs')
+
+            try:
+                (self.metric_data_dico['EvalV']['value'],
+                 self.metric_data_dico['CShearRes']['value'],
+                 self.metric_data_dico['Fv']['value']) = (
+                         shear_evaluation_function(
+                            self.metric_data_dico['Nordic_Lam_type']['value'],
+                            self.metric_data_dico['Nordic_Lam_depth']['value'],
+                            self.metric_data_dico['Nordic_Lam_thickness']['value'],
+                            self.metric_data_dico['hole_diameter']['value'],
+                            self.metric_data_dico['shear_force_Vf']['value'],
+                            self.metric_data_dico['K_D']['value'],
+                            self.metric_data_dico['K_H']['value'],
+                            self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
+                            self.metric_data_dico['shear_force_Wf']['value'],
+                            self.metric_data_dico['shear_resistance_Wr']['value'],
+                            self.metric_data_dico['shear_method_a_used']['value']))
+            except:
+                (self.metric_data_dico['EvalV']['value'],
+                 self.metric_data_dico['CShearRes']['value'],
+                 self.metric_data_dico['Fv']['value']) = (None,)*3
+                print('shear calculations failed to load due to invalid inputs')
+
+            try:
+                (self.metric_data_dico['Evaltp']['value'], 
+                 self.metric_data_dico['Ftp']['value'], 
+                 self.metric_data_dico['FtpRes']['value'], 
+                 self.metric_data_dico['FtpN']['value'] ) = (
+                        fu.P_Tension(
+                            self.metric_data_dico['Nordic_Lam_type']['value'],
+                            self.metric_data_dico['Nordic_Lam_depth']['value'],
+                            self.metric_data_dico['Nordic_Lam_thickness']['value'],
+                            self.metric_data_dico['hole_diameter']['value'],
+                            self.metric_data_dico['shear_force_Vf']['value'],
+                            convert(self.metric_data_dico['bending_force_Mf']['value'],"Nm","Nmm"),
+                            self.metric_data_dico['Nordic_Lam_ply_quantity']['value']))
+            except:
+                (self.metric_data_dico['Evaltp']['value'], 
+                 self.metric_data_dico['Ftp']['value'], 
+                 self.metric_data_dico['FtpRes']['value'], 
+                 self.metric_data_dico['FtpN']['value'] ) = (None,)*4
+                print('perpendicular tension calculations failed to load due to invalid inputs')
 
             #Find the maximum length in m to be able to use shear equation 7.5.7.2 (b)
-            self.SMLength = round((2000000000/(h*b))/1000,2)
+###-_- Remove the self.SMLength after updating.
+            self.metric_data_dico['max_beam_length']['value'] = (
+                    round((2000000000 / (
+                    self.metric_data_dico['Nordic_Lam_depth']['value']
+                    * self.metric_data_dico['Nordic_Lam_thickness']['value']))
+                    / 1000, 2))
+            self.SMLength = self.metric_data_dico['max_beam_length']['value'] # To update and remove
 
+            # Update the imperial data dictionary
+            for selected_key in self.metric_data_dico:
+                self.imperial_data_dico[selected_key]['value'] = (
+                        convert(
+                                self.metric_data_dico[selected_key]['value'],
+                                self.metric_data_dico[selected_key]['unit'],
+                                self.imperial_data_dico[selected_key]['unit']))
+
+
+#### In progress reworking this function.
+
+
+
+###-_- ADD all the converted metric values to the imperial dictionary
+
+
+### To remove ###
             #Convert all the outputs in imperial if the interface is in imperial mode.
             PresImp, PresMet = 'psf', 'MPa'
-            if self.Unit.get() == 'Imperial':
+
+
+
+            if selected_unit == 'imperial':
                 CMr = (convert(CMr,"Nm","lbft"))
-                Mf = (convert(Mf,"Nm","lbft")) 
+                bending_force_Mf = (convert(bending_force_Mf,"Nm","lbft")) 
                 CShearRes = (convert(CShearRes,"N","lb")) 
-                Vf = (convert(Vf,"N","lb")) 
-                Wf = (convert(Wf,"N","lb")) 
-                Wr = (convert(Wr,"N","lb")) 
+                shear_force_Vf = (convert(shear_force_Vf,"N","lb")) 
+                shear_force_Wf = (convert(shear_force_Wf,"N","lb")) 
+                shear_resistance_Wr = (convert(shear_resistance_Wr,"N","lb")) 
                 Ftp = convert(Ftp,PresMet,PresImp)
                 FtpRes = convert(FtpRes,PresMet,PresImp)
                 self.SMLength = (convert(self.SMLength,"m","ft"))
                 self.FtUnit = PresImp
             else:
                 self.FtUnit = PresMet                
+### /To remove ###
+
+###
+##
+#            
+            if selected_unit == 'imperial':
+                data_dico = self.imperial_data_dico
+            elif selected_unit == 'metric':
+                data_dico = self.metric_data_dico
 
             #Set the maximum length to be able to use shear equation 7.5.7.2 (b)
-            self.ShearMaxLength.set(str(round(self.SMLength,0)))
+            self.ShearMaxLength.set(str(round(data_dico['Nordic_Lam_depth']['value'],0)))
 
-            print('Residual Mr = ',CMr,'; Residual shear resistance = ',CShearRes,'; tp Force = ', Ftp, ' MPa ; tp Resistance = ', FtpRes,' MPa')
-#            print('Wf for testing = ',Wf)
+            print('Residual Mr = ',
+                  data_dico['CMr']['value'],'; Residual shear resistance = ',
+                  data_dico['CShearRes']['value'],'; tp Force = ',
+                  data_dico['Ftp']['value'], ' MPa ; tp Resistance = ',
+                  data_dico['FtpRes']['value'],' MPa')
+
             #Bending output display on interface
-            self.Out401Mf.set (str(round(Mf,))+" "+self.UnitDict[self.ID5][self.Un])
+            self.Out401bending_force_Mf.set (
+                    str(round(data_dico['bending_force_Mf']['value'],))
+                    + ' ' + data_dico['bending_force_Mf']['unit'])
+            raise ValueError()
+            
             self.Out501CMr.set (str(round(CMr,))+" "+self.UnitDict[self.ID5][self.Un])
             self.Out601B.set (round(EvalM,2))
 
             #Shear output display on interface
-            if ShearA == 1:
-                self.Out402Vf.set (str(round(Wf,))+" "+self.UnitDict[self.ID7][self.Un])
+            if shear_method_a_used == 1:
+                self.Out402Vf.set (str(round(shear_force_Wf,))+" "+self.UnitDict[self.ID7][self.Un])
                 self.Out502CVr.set (str(round(CShearRes,))+" "+self.UnitDict[self.ID7][self.Un])
                 self.Out602V.set (round(EvalV,2))                
-            elif ShearA == 0: 
-                self.Out402Vf.set (str(round(Vf,))+" "+self.UnitDict[self.ID7][self.Un])
+            elif shear_method_a_used == 0: 
+                self.Out402Vf.set (str(round(shear_force_Vf,))+" "+self.UnitDict[self.ID7][self.Un])
                 self.Out502CVr.set (str(round(CShearRes,))+" "+self.UnitDict[self.ID7][self.Un])
                 self.Out602V.set (round(EvalV,2))
 
             #Tension perpendicular to grain output display on interface
-            if self.Unit.get() == 'Imperial':
+            if self.selected_unit.get() == 'Imperial':
                 self.Out403Ftp.set (str(round(Ftp,))+' '+self.FtUnit)
                 self.Out503FtpRes.set (str(round(FtpRes,))+' '+self.FtUnit)
             else:
@@ -434,32 +609,33 @@ class MainInt:
             self.Out603TP.set (round(Evaltp,2))
             
             #Convert all imperial input units to metric for the report
-            if self.Unit.get() == 'Imperial':
+            if self.selected_unit.get() == 'Imperial':
                 CMr = (convert(CMr,"lbft","Nm"))
-                Mf = (convert(Mf,"lbft","Nm")) 
+                bending_force_Mf = (convert(bending_force_Mf,"lbft","Nm")) 
                 CShearRes = (convert(CShearRes,"lb","N")) 
-                Vf = (convert(Vf,"lb","N"))         
-                Wf = (convert(Wf,"lb","N"))
-                Wr = (convert(Wr,"lb","N"))
+                shear_force_Vf = (convert(shear_force_Vf,"lb","N"))         
+                shear_force_Wf = (convert(shear_force_Wf,"lb","N"))
+                shear_resistance_Wr = (convert(shear_resistance_Wr,"lb","N"))
                 Ftp = convert(Ftp,PresImp,PresMet)
                 FtpRes = convert(FtpRes,PresImp,PresMet)
 
-            if ShearA == 1:
-                ShearEq = '7.5.7.2 (a)'
-            elif ShearA == 0:
-                ShearEq = '7.5.7.2 (b)'
+            if shear_method_a_used == 1:
+                shear_equation_reference = '7.5.7.2 (a)'
+            elif shear_method_a_used == 0:
+                shear_equation_reference = '7.5.7.2 (b)'
             
-#-_-#       # create a dictionary with all the data as dictionary. {'Mf': {'imperial_unit':2222, 'lbft','metric_unit':3333, 'Nm'}}
+#-_-#       # create a dictionary with all the data as dictionary. {'bending_force_Mf': {'imperial_unit':2222, 'lbft','metric_unit':3333, 'Nm'}}
             # Get the utility function to create dictionaries.
 
-            result_dico_Key_list = ['Project','Notes','NLType','Ply','b','h','hd',
-                                    'MethodUsed','Mf','Mr','CMr','EvalM',
-                                    'ShearEq','Vf','Wf','Wr','CShearRes','EvalV',
-                                    'KD','KH','Ftp','FtpRes','Evaltp','FtpN','Fv']
+            '''
+                Data ditionary
+                {'name': {'imperial':{'Unit Type', Value},'metric':{'Unit Type', Value}}}
+            '''
+
 
 
         
-            return Project,Notes,NLType,Ply,b,h,hd,MethodUsed,Mf,Mr,CMr,EvalM,ShearEq,Vf,Wf,Wr,CShearRes,EvalV,KD,KH,Ftp,FtpRes,Evaltp,FtpN,Fv
+            return project_name,Notes,NLType,Nordic_Lam_ply_quantity,Nordic_Lam_thickness,h,hole_diameter,selected_calc_method,bending_force_Mf,bending_resistance_Mr,CMr,EvalM,shear_equation_reference,shear_force_Vf,shear_force_Wf,shear_resistance_Wr,CShearRes,EvalV,K_D,K_H,Ftp,FtpRes,Evaltp,FtpN,Fv
 
 ### This is where the Repair GUI code begins:
 ###
@@ -472,7 +648,7 @@ class MainInt:
                     self.Glued_PanelWindow.destroy()            
                 except:
                     print('Panel reinforcement')                
-                Project,Notes,self.NLType,self.Ply,b,self.h,self.hd,MethodUsed,Mf,Mr,CMr,EvalM,ShearEq,Vf,Wf,Wr,CShearRes,EvalV,KD,KH,Ftp,FtpRes,Evaltp,self.FtpN,Fv = self.InputProcess()
+                project_name,Notes,self.NLType,self.Nordic_Lam_ply_quantity,Nordic_Lam_thickness,self.h,self.hole_diameter,selected_calc_method,bending_force_Mf,bending_resistance_Mr,CMr,EvalM,shear_equation_reference,shear_force_Vf,shear_force_Wf,shear_resistance_Wr,CShearRes,EvalV,K_D,K_H,Ftp,FtpRes,Evaltp,self.FtpN,Fv = self.InputProcess()
                 self.Glued_PanelGUI()
 
 
@@ -487,7 +663,7 @@ class MainInt:
                 
                 
 ### Screw GUI and functions        
-#        def ASSY_ScrewGUI(self,FtpN,NLType,Ply,h,hd): #Remove parameters?
+#        def ASSY_ScrewGUI(self,FtpN,NLType,Nordic_Lam_ply_quantity,h,hole_diameter): #Remove parameters?
         def ASSY_ScrewGUI(self):
             self.ASSY_ScrewWindow = Toplevel(self.master)
             self.ASSY_ScrewWindow .wm_title("Repair parameters")
@@ -594,7 +770,7 @@ class MainInt:
         #Function to update the User Input dependant outputs (Screw infos)
         def ScrewUserOut(self,EO):
             
-            self.NLType = self.Input1.get()
+            self.NLType = self.input_Nordic_Lam_type_1.get()
             G = fu.tbNL.GenDict()[self.NLType]['G']
             ScrewTable = Rfu.tblNLRS.GenDict()
             self.ScrewType = self.ScrewInput2.get()
@@ -614,7 +790,7 @@ class MainInt:
             
         def ASSY_ScrewCal(self):
             self.Input = self.InputProcess()
-            Project,Notes,self.NLType,self.Ply,b,self.h,self.hd,MethodUsed,Mf,Mr,CMr,EvalM,ShearEq,Vf,Wf,Wr,CShearRes,EvalV,KD,KH,Ftp,FtpRes,Evaltp,self.FtpN,Fv = self.Input
+            project_name,Notes,self.NLType,self.Nordic_Lam_ply_quantity,b,self.h,self.hole_diameter,selected_calc_method,bending_force_Mf,bending_resistance_Mr,CMr,EvalM,shear_equation_reference,shear_force_Vf,shear_force_Wf,shear_resistance_Wr,CShearRes,EvalV,K_D,K_H,Ftp,FtpRes,Evaltp,self.FtpN,Fv = self.Input
             self.ScrewUserOut("<<ComboboxSelected>>")  
             
             if abs(self.ScrewOffset) > self.h * 0.1:
@@ -624,7 +800,7 @@ class MainInt:
                 try:
                     self.ScrewQty = int(self.ScrewInput1.get())
                     if self.ScrewQty * self.ScrewRes * self.ScrewResAbs * self.ScrewTip > 0:
-                        MaxScrew, ThreadL, TpScrew = Rfu.ScrewRepair(self.FtpN,self.ScrewQty,self.ScrewRes,self.ScrewResAbs,self.ScrewTip,self.Ply,b,self.h,self.hd,self.ScrewOri.get(),self.ScrewOffset)
+                        MaxScrew, ThreadL, TpScrew = Rfu.ScrewRepair(self.FtpN,self.ScrewQty,self.ScrewRes,self.ScrewResAbs,self.ScrewTip,self.Nordic_Lam_ply_quantity,b,self.h,self.hole_diameter,self.ScrewOri.get(),self.ScrewOffset)
                         print('length: ' + str(round(MaxScrew,4)) + 'mm  Thread: ' + str(round(ThreadL,4)))
                         self.ScrewOut4Var.set(round(MaxScrew,2))
 #                        self.ScrewOut5Var.set(round(self.FtpN,2))
@@ -661,7 +837,7 @@ class MainInt:
             self.Glued_PanelWindow .attributes('-topmost', True)    
             
             
-            self.Panel_h, self.Panel_w, self.NailQty = Rfu.PanelRepair(self.FtpN,self.Ply,self.h,self.hd)
+            self.Panel_h, self.Panel_w, self.NailQty = Rfu.PanelRepair(self.FtpN,self.Nordic_Lam_ply_quantity,self.h,self.hole_diameter)
             
         #Column 0 Input values & buttons
             Col = 0
@@ -709,9 +885,9 @@ class MainInt:
 
 #Convert input between imperial and international systems.
         def Radio(self):
-            if self.Units[self.Un] != self.Unit.get():
-                self.Un = 0 if self.Unit.get() == 'Imperial' else 1
-                if self.Unit.get() == 'Imperial':
+            if self.Units[self.Un] != self.selected_unit.get():
+                self.Un = 0 if self.selected_unit.get() == 'Imperial' else 1
+                if self.selected_unit.get() == 'Imperial':
                     FUni="mm"
                     SUni="in"
                     FUni2="m"
@@ -730,27 +906,27 @@ class MainInt:
                     FFor='lb'
                     SFor='N'
                 self.LblInput2Txt.set(self.Lbl2+self.UnitDict[self.ID2][self.Un])            
-                self.LblInput3Txt.set(self.Lbl3+self.UnitDict[self.ID3][self.Un])
-                self.LblInput4Txt.set(self.Lbl4+self.UnitDict[self.ID4][self.Un])
-                self.LblInput5Txt.set(self.Lbl5+self.UnitDict[self.ID5][self.Un])
-                self.LblInput6Txt.set(self.Lbl6+self.UnitDict[self.ID6][self.Un])
-                self.LblInput7Txt.set(self.Lbl7+self.UnitDict[self.ID7][self.Un])
+                self.Lbl_input_Nordic_Lam_depth_3_Txt.set(self.Lbl3+self.UnitDict[self.ID3][self.Un])
+                self.label_input_hole_diameter_4_text.set(self.Lbl4+self.UnitDict[self.ID4][self.Un])
+                self.label_input_bending_force_Mf_5_text.set(self.Lbl5+self.UnitDict[self.ID5][self.Un])
+                self.label_input_bending_resistance_Mr_6_text.set(self.Lbl6+self.UnitDict[self.ID6][self.Un])
+                self.label_input_shear_force_Vf_7_text.set(self.Lbl7+self.UnitDict[self.ID7][self.Un])
                 self.LblOutShearMaxLengthTxt.set(self.LblShearMaxLength+self.UnitDict[self.IDOutShearMaxLength][self.Un])
-                self.LblInput10Txt.set(self.Lbl10+self.UnitDict[self.ID10][self.Un])
-                self.LblInput11Txt.set(self.Lbl11+self.UnitDict[self.ID11][self.Un])
+                self.label_input_shear_force_Wf_10_text.set(self.Lbl10+self.UnitDict[self.ID10][self.Un])
+                self.label_input_shear_resistance_Wr_11_text.set(self.Lbl11+self.UnitDict[self.ID11][self.Un])
                 
-                if self.Unit.get() == "Imperial":
-                    self.blist = self.bImp
-                    self.hlist = self.hImp
+                if self.selected_unit.get() == "Imperial":
+                    self.Nordic_Lam_thickness_List = self.Nordic_Lam_imperial_thickness_List
+                    self.Nordic_Lam_depth_List = self.Nordic_Lam_imperial_depth_List
                 else:
-                    self.blist = self.bMet
-                    self.hlist = self.hMet
+                    self.Nordic_Lam_thickness_List = self.Nordic_Lam_metric_thickness_List
+                    self.Nordic_Lam_depth_List = self.Nordic_Lam_metric_depth_List
 
-                self.Input2['values']=self.blist
-                self.Input3['values']=self.hlist
+                self.input_Nordic_Lam_thickness_2['values']=self.Nordic_Lam_thickness_List
+                self.input_Nordic_Lam_depth_3['values']=self.Nordic_Lam_depth_List
 
 #-_- #Create a dico with inputs and units.        
-                InputList = (self.Input2,self.Input3,self.Input4)
+                InputList = (self.input_Nordic_Lam_thickness_2,self.input_Nordic_Lam_depth_3,self.input_hole_diameter_4)
                 
                 for i in InputList:
                     try:
@@ -760,7 +936,7 @@ class MainInt:
                     except:
                         i.delete(0,END)
                 
-                InputList = (self.Input5,self.Input6)
+                InputList = (self.input_bending_force_Mf_5,self.input_bending_resistance_Mr_6)
                 for i in InputList:
                     try:
                         self.ConvVal = convert(float(i.get()),FMom,SMom)
@@ -769,7 +945,7 @@ class MainInt:
                     except:
                         i.delete(0,END)
 
-                InputList = (self.Input7,self.Input10,self.Input11)
+                InputList = (self.input_shear_force_Vf_7,self.input_shear_force_Wf_10,self.input_shear_resistance_Wr_11)
                 for i in InputList:
                     try:
 #                        print(i.get())

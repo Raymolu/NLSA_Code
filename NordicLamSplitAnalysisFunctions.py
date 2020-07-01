@@ -10,6 +10,16 @@ import XLProcessingTableClass as XLTB
 from tkinter import messagebox
 
 
+def try_catch(func):
+    def wrapper(*args,**kwargs): 
+        try:
+            fu = func(*args,**kwargs)
+        except:
+            print('Function: '+str(func.__name__)+' failed to load\nargs: ' + str(args))
+            return
+        return fu
+    return wrapper
+
 #Generate product spec object
 SpecFileName = "NordicLamSpecs.xlsx"
 tbNL = XLTB.XLTable(1,SpecFileName)
@@ -19,6 +29,7 @@ Maxh=2401
 Maxb=366
 
 #Evaluate the beam residual bending resistance
+@try_catch
 def B_Eval(Mf,Mr,hd,h):
     """
         A_bend: Allowed bending (data pulled from lookup in spec table based on user input)
@@ -46,6 +57,7 @@ def B_Eval(Mf,Mr,hd,h):
 
 
 #Evaluate the Beam residual shear resistance
+@try_catch
 def S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):    
     """
         Nordic-Lam Type based on CSA 086-14
@@ -66,7 +78,7 @@ def S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):
 
     if h <= Maxh and b <= Maxb:
         # Use equation (a) or (b) methodes
-        if ShearA == 1 and Wf*Wr > 0:
+        if ShearA == 1 and (Wf != None or Wr != None) and Wf*Wr > 0:
             print('Shear equation values from: 7.5.7.2 (a)')
             CShearRes = Wr * (h-hd)/h
             Eval = Wf/CShearRes
@@ -95,11 +107,13 @@ def S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):
 
 
 #Perpendicular to grain tension calculation
+@try_catch
 def P_Tension(NLType,h,b,hd,Vf,Mf,Ply):
     """
         h: from 9.5" to 16" (Height), mm
         If h >=17.72in (450mm): The Kt,90 will need to be calculated
         hd: Hole diameter, mm
+        Mf: bending force in Nmm (typicaly we input and display Mf in Nm)
     """
     #   Note: For round holes only!!!
     if h <= Maxh and b <= Maxb:
@@ -110,7 +124,7 @@ def P_Tension(NLType,h,b,hd,Vf,Mf,Ply):
                 Bending_tp = 99999999
         else:
             Bending_tp = (3*Mf*hd**3*(hd+h))/(4*h**3*(h*hd+h**2+hd**2)) 
-            print('Alternate Bending_tp equation used\nMore conservative then DIN 1052 equation')
+            print('Alternate Bending_tp equation used\nMore conservative than DIN 1052 equation')
         # Tension perpendicular to wood fibre resistance
         # Check for Kt90 for resistance reduction based on beam depth.
         Kt90 = min(1,(450/h)**0.5) # mm
@@ -143,6 +157,7 @@ def P_Tension(NLType,h,b,hd,Vf,Mf,Ply):
     return Eval, Ftp, FtpRes, FtpN
 
 #Pass spec data
+@try_catch
 def NLSpecs():
     NLSpecs=tbNL.XLToTable()
     return NLSpecs
