@@ -544,23 +544,23 @@ class MainInt:
 
 ### To remove ###
             #Convert all the outputs in imperial if the interface is in imperial mode.
-            PresImp, PresMet = 'psf', 'MPa'
-
-
-
-            if selected_unit == 'imperial':
-                CMr = (convert(CMr,"Nm","lbft"))
-                bending_force_Mf = (convert(bending_force_Mf,"Nm","lbft")) 
-                CShearRes = (convert(CShearRes,"N","lb")) 
-                shear_force_Vf = (convert(shear_force_Vf,"N","lb")) 
-                shear_force_Wf = (convert(shear_force_Wf,"N","lb")) 
-                shear_resistance_Wr = (convert(shear_resistance_Wr,"N","lb")) 
-                Ftp = convert(Ftp,PresMet,PresImp)
-                FtpRes = convert(FtpRes,PresMet,PresImp)
-                self.SMLength = (convert(self.SMLength,"m","ft"))
-                self.FtUnit = PresImp
-            else:
-                self.FtUnit = PresMet                
+#            PresImp, PresMet = 'psf', 'MPa'
+#
+#
+#
+#            if selected_unit == 'imperial':
+#                CMr = (convert(CMr,"Nm","lbft"))
+#                bending_force_Mf = (convert(bending_force_Mf,"Nm","lbft")) 
+#                CShearRes = (convert(CShearRes,"N","lb")) 
+#                shear_force_Vf = (convert(shear_force_Vf,"N","lb")) 
+#                shear_force_Wf = (convert(shear_force_Wf,"N","lb")) 
+#                shear_resistance_Wr = (convert(shear_resistance_Wr,"N","lb")) 
+#                Ftp = convert(Ftp,PresMet,PresImp)
+#                FtpRes = convert(FtpRes,PresMet,PresImp)
+#                self.SMLength = (convert(self.SMLength,"m","ft"))
+#                self.FtUnit = PresImp
+#            else:
+#                self.FtUnit = PresMet                
 ### /To remove ###
 
 ###
@@ -568,8 +568,10 @@ class MainInt:
 #            
             if selected_unit == 'imperial':
                 data_dico = self.imperial_data_dico
+                Ftp_round_factor = 0
             elif selected_unit == 'metric':
                 data_dico = self.metric_data_dico
+                Ftp_round_factor = 3
 
             #Set the maximum length to be able to use shear equation 7.5.7.2 (b)
             self.ShearMaxLength.set(str(round(data_dico['Nordic_Lam_depth']['value'],0)))
@@ -584,58 +586,58 @@ class MainInt:
             self.Out401bending_force_Mf.set (
                     str(round(data_dico['bending_force_Mf']['value'],))
                     + ' ' + data_dico['bending_force_Mf']['unit'])
-            raise ValueError()
-            
-            self.Out501CMr.set (str(round(CMr,))+" "+self.UnitDict[self.ID5][self.Un])
-            self.Out601B.set (round(EvalM,2))
+            self.Out501CMr.set (
+                    str(round(data_dico['CMr']['value'],))
+                    + ' ' + data_dico['CMr']['unit'])
+            self.Out601B.set (
+                    round(data_dico['EvalM']['value'],2))
 
             #Shear output display on interface
             if shear_method_a_used == 1:
-                self.Out402Vf.set (str(round(shear_force_Wf,))+" "+self.UnitDict[self.ID7][self.Un])
-                self.Out502CVr.set (str(round(CShearRes,))+" "+self.UnitDict[self.ID7][self.Un])
-                self.Out602V.set (round(EvalV,2))                
+                self.Out402Vf.set (
+                        str(round(data_dico['shear_force_Wf']['value'],))
+                        + ' ' + data_dico['shear_force_Wf']['unit'])
             elif shear_method_a_used == 0: 
-                self.Out402Vf.set (str(round(shear_force_Vf,))+" "+self.UnitDict[self.ID7][self.Un])
-                self.Out502CVr.set (str(round(CShearRes,))+" "+self.UnitDict[self.ID7][self.Un])
-                self.Out602V.set (round(EvalV,2))
+                self.Out402Vf.set (
+                        str(round(data_dico['shear_force_Vf']['value'],))
+                        + ' ' + data_dico['shear_force_Vf']['unit'])
+            self.Out502CVr.set (
+                    str(round(data_dico['CShearRes']['value'],))
+                    + ' ' + data_dico['CShearRes']['unit'])
+            self.Out602V.set (
+                    round(data_dico['EvalV']['value'],2))                
 
             #Tension perpendicular to grain output display on interface
-            if self.selected_unit.get() == 'Imperial':
-                self.Out403Ftp.set (str(round(Ftp,))+' '+self.FtUnit)
-                self.Out503FtpRes.set (str(round(FtpRes,))+' '+self.FtUnit)
-            else:
-                self.Out403Ftp.set (str(round(Ftp,3))+' '+self.FtUnit)
-                self.Out503FtpRes.set (str(round(FtpRes,3))+' '+self.FtUnit)
-            self.Out603TP.set (round(Evaltp,2))
+
+
+
+            self.Out403Ftp.set (
+                    str(round(data_dico['Ftp']['value'],Ftp_round_factor))
+                    +' '+ data_dico['Ftp']['unit'])
+            self.Out503FtpRes.set (
+                    str(round(data_dico['FtpRes']['value'],Ftp_round_factor))
+                    +' '+ data_dico['FtpRes']['unit'])
+            self.Out603TP.set (
+                    round(data_dico['Evaltp']['value'],2))
             
             #Convert all imperial input units to metric for the report
-            if self.selected_unit.get() == 'Imperial':
-                CMr = (convert(CMr,"lbft","Nm"))
-                bending_force_Mf = (convert(bending_force_Mf,"lbft","Nm")) 
-                CShearRes = (convert(CShearRes,"lb","N")) 
-                shear_force_Vf = (convert(shear_force_Vf,"lb","N"))         
-                shear_force_Wf = (convert(shear_force_Wf,"lb","N"))
-                shear_resistance_Wr = (convert(shear_resistance_Wr,"lb","N"))
-                Ftp = convert(Ftp,PresImp,PresMet)
-                FtpRes = convert(FtpRes,PresImp,PresMet)
+#            if self.selected_unit.get() == 'Imperial':
+#                CMr = (convert(CMr,"lbft","Nm"))
+#                bending_force_Mf = (convert(bending_force_Mf,"lbft","Nm")) 
+#                CShearRes = (convert(CShearRes,"lb","N")) 
+#                shear_force_Vf = (convert(shear_force_Vf,"lb","N"))         
+#                shear_force_Wf = (convert(shear_force_Wf,"lb","N"))
+#                shear_resistance_Wr = (convert(shear_resistance_Wr,"lb","N"))
+#                Ftp = convert(Ftp,PresImp,PresMet)
+#                FtpRes = convert(FtpRes,PresImp,PresMet)
 
             if shear_method_a_used == 1:
-                shear_equation_reference = '7.5.7.2 (a)'
+                data_dico['shear_equation_reference']['value'] = '7.5.7.2 (a)'
             elif shear_method_a_used == 0:
-                shear_equation_reference = '7.5.7.2 (b)'
-            
-#-_-#       # create a dictionary with all the data as dictionary. {'bending_force_Mf': {'imperial_unit':2222, 'lbft','metric_unit':3333, 'Nm'}}
-            # Get the utility function to create dictionaries.
-
-            '''
-                Data ditionary
-                {'name': {'imperial':{'Unit Type', Value},'metric':{'Unit Type', Value}}}
-            '''
-
-
-
+                data_dico['shear_equation_reference']['value'] = '7.5.7.2 (b)'
         
-            return project_name,Notes,NLType,Nordic_Lam_ply_quantity,Nordic_Lam_thickness,h,hole_diameter,selected_calc_method,bending_force_Mf,bending_resistance_Mr,CMr,EvalM,shear_equation_reference,shear_force_Vf,shear_force_Wf,shear_resistance_Wr,CShearRes,EvalV,K_D,K_H,Ftp,FtpRes,Evaltp,FtpN,Fv
+            return data_dico
+#            return project_name,Notes,Nordic_Lam_type,Nordic_Lam_ply_quantity,Nordic_Lam_thickness,h,hole_diameter,selected_calc_method,bending_force_Mf,bending_resistance_Mr,CMr,EvalM,shear_equation_reference,shear_force_Vf,shear_force_Wf,shear_resistance_Wr,CShearRes,EvalV,K_D,K_H,Ftp,FtpRes,Evaltp,FtpN,Fv
 
 ### This is where the Repair GUI code begins:
 ###
@@ -648,7 +650,14 @@ class MainInt:
                     self.Glued_PanelWindow.destroy()            
                 except:
                     print('Panel reinforcement')                
-                project_name,Notes,self.NLType,self.Nordic_Lam_ply_quantity,Nordic_Lam_thickness,self.h,self.hole_diameter,selected_calc_method,bending_force_Mf,bending_resistance_Mr,CMr,EvalM,shear_equation_reference,shear_force_Vf,shear_force_Wf,shear_resistance_Wr,CShearRes,EvalV,K_D,K_H,Ftp,FtpRes,Evaltp,self.FtpN,Fv = self.InputProcess()
+                data_dico = self.InputProcess()
+                
+#                self.Nordic_Lam_type = data_dico[]['value']
+#                self.Nordic_Lam_ply_quantity =
+#                self.h =
+#                self.hole_diameter =
+#                self.FtpN =
+                
                 self.Glued_PanelGUI()
 
 
@@ -663,7 +672,7 @@ class MainInt:
                 
                 
 ### Screw GUI and functions        
-#        def ASSY_ScrewGUI(self,FtpN,NLType,Nordic_Lam_ply_quantity,h,hole_diameter): #Remove parameters?
+#        def ASSY_ScrewGUI(self,FtpN,Nordic_Lam_type,Nordic_Lam_ply_quantity,h,hole_diameter): #Remove parameters?
         def ASSY_ScrewGUI(self):
             self.ASSY_ScrewWindow = Toplevel(self.master)
             self.ASSY_ScrewWindow .wm_title("Repair parameters")
@@ -770,8 +779,8 @@ class MainInt:
         #Function to update the User Input dependant outputs (Screw infos)
         def ScrewUserOut(self,EO):
             
-            self.NLType = self.input_Nordic_Lam_type_1.get()
-            G = fu.tbNL.GenDict()[self.NLType]['G']
+            self.Nordic_Lam_type = self.input_Nordic_Lam_type_1.get()
+            G = fu.tbNL.GenDict()[self.Nordic_Lam_type]['G']
             ScrewTable = Rfu.tblNLRS.GenDict()
             self.ScrewType = self.ScrewInput2.get()
             try:
@@ -790,7 +799,7 @@ class MainInt:
             
         def ASSY_ScrewCal(self):
             self.Input = self.InputProcess()
-            project_name,Notes,self.NLType,self.Nordic_Lam_ply_quantity,b,self.h,self.hole_diameter,selected_calc_method,bending_force_Mf,bending_resistance_Mr,CMr,EvalM,shear_equation_reference,shear_force_Vf,shear_force_Wf,shear_resistance_Wr,CShearRes,EvalV,K_D,K_H,Ftp,FtpRes,Evaltp,self.FtpN,Fv = self.Input
+            project_name,Notes,self.Nordic_Lam_type,self.Nordic_Lam_ply_quantity,b,self.h,self.hole_diameter,selected_calc_method,bending_force_Mf,bending_resistance_Mr,CMr,EvalM,shear_equation_reference,shear_force_Vf,shear_force_Wf,shear_resistance_Wr,CShearRes,EvalV,K_D,K_H,Ftp,FtpRes,Evaltp,self.FtpN,Fv = self.Input
             self.ScrewUserOut("<<ComboboxSelected>>")  
             
             if abs(self.ScrewOffset) > self.h * 0.1:
@@ -837,7 +846,37 @@ class MainInt:
             self.Glued_PanelWindow .attributes('-topmost', True)    
             
             
-            self.Panel_h, self.Panel_w, self.NailQty = Rfu.PanelRepair(self.FtpN,self.Nordic_Lam_ply_quantity,self.h,self.hole_diameter)
+#            self.Panel_h, self.Panel_w, self.NailQty = Rfu.PanelRepair(self.FtpN,self.Nordic_Lam_ply_quantity,self.h,self.hole_diameter)
+            self.metric_data_dico['panel_height'] = {'unit': 'mm', 'value': None}
+            self.metric_data_dico['panel_width'] = {'unit': 'mm', 'value': None}
+            self.metric_data_dico['nail_quantity'] = {'unit': None, 'value': None}
+            self.imperial_data_dico['panel_height'] = {'unit': 'in', 'value': None}
+            self.imperial_data_dico['panel_width'] = {'unit': 'in', 'value': None}
+            self.imperial_data_dico['nail_quantity'] = {'unit': None, 'value': None}
+            (self.metric_data_dico['panel_height']['Value'],
+             self.metric_data_dico['panel_width']['Value'],
+             self.metric_data_dico['nail_quantity']['Value']) = (
+#            self.Panel_h, self.Panel_w, self.NailQty = (
+                    Rfu.PanelRepair(
+                            self.metric_data_dico['FtpN']['value'],
+                            self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
+                            self.metric_data_dico['Nordic_Lam_depth']['value'],
+                            self.metric_data_dico['hole_diameter']['value']))
+
+#-_- Turn this imperial data update in a function
+            for selected_key in self.metric_data_dico:
+                self.imperial_data_dico[selected_key]['value'] = (
+                        convert(
+                                self.metric_data_dico[selected_key]['value'],
+                                self.metric_data_dico[selected_key]['unit'],
+                                self.imperial_data_dico[selected_key]['unit']))            
+            
+            if self.selected_unit.get().lower() == 'imperial':
+                data_dico = self.imperial_data_dico
+                round_at = 2
+            elif self.selected_unit.get().lower() == 'metric':
+                data_dico = self.metric_data_dico
+                round_at = 1
             
         #Column 0 Input values & buttons
             Col = 0
@@ -860,9 +899,25 @@ class MainInt:
                            '\nplywood installed grain perpendicular to beam span'+
                            '\n\nPanel fastened to beam with PL Premium or better structural'+
                            '\nadhesive and 0.131''"'' x 3.25''"'' round head driven nails.')
-            TextOut2Var = ('Panel dimensions: ' + str(round(self.Panel_h,1)) + ' mm x ' + str(round(self.Panel_w,1)) + ' mm' +
-                           '\nNail minimum quantity: ' + str(self.NailQty) +
-                           '\nTension perpendicular to grain: ' + str(round(self.FtpN,0)) + 'N')
+            
+###-_- Troubleshooting why the panel_height and with are None.            
+            print(data_dico['panel_height']['value'], data_dico['panel_width']['value'],
+                  data_dico['FtpN']['value'])
+            try:
+                TextOut2Var = ('Panel dimensions: ' +
+                               str(round(data_dico['panel_height']['value'],round_at)) + ' '
+                                + data_dico['panel_height']['unit'] + ' x ' +
+                                str(round(data_dico['panel_width']['value'],round_at)) + ' '
+                                + data_dico['panel_width']['unit'] +
+                               '\nNail minimum quantity: ' + 
+                               str(data_dico['nail_quantity']['value']) +
+                               '\nTension perpendicular to grain: ') 
+
+    #                           + str(round(data_dico['FtpN']['value'])) + ' ' +
+    #                           data_dico['FtpN']['unit'])
+            except:
+                TextOut2Var = ''
+                
             self.PanelOut1Var.set(TextOut1Var)
             self.PanelOut2Var.set(TextOut2Var)
             
@@ -870,7 +925,11 @@ class MainInt:
             try:
                 ReinforceMethod = self.Reinforce.get()
                 Input = self.InputProcess()
-                PanelData = ReinforceMethod, self.Panel_h, self.Panel_w, self.NailQty
+                #### Update with report based on unit type
+                PanelData = (ReinforceMethod, 
+                             self.metric_data_dico['panel_height']['Value'],
+                             self.metric_data_dico['panel_width']['value'],
+                             self.metric_data_dico['nail_quantity']['value'])
                 Input += PanelData
             except:
                 print('invalid data')
