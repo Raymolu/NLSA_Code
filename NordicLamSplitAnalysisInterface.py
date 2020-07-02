@@ -12,6 +12,7 @@ from tkinter import (Label, Entry, Text, ttk, messagebox,
 #from tkinter import messagebox
 import os
 import NordicLamSplitAnalysisFunctions as fu
+from NordicLamSplitRepairFunctions import try_round_NA
 import NordicLamSplitRepairFunctions as Rfu
 from UnitConversion import convert
 import Report as Re
@@ -838,30 +839,37 @@ class MainInt:
             Re.Report(Input)
             if MaxScrew !=0: self.ASSY_ScrewWindow.destroy()
 
-### Panel GUI and functions    
+        ### Panel GUI and functions    
         def Glued_PanelGUI(self):  
+            '''
+                This is the panel GUI to display the results for a panel reinforcer.                
+            '''
             self.Glued_PanelWindow = Toplevel(self.master)
             self.Glued_PanelWindow .wm_title("Repair parameters")
-            self.Glued_PanelWindow .wm_geometry('300x220')    
             self.Glued_PanelWindow .attributes('-topmost', True)    
             
-            
-#            self.Panel_h, self.Panel_w, self.NailQty = Rfu.PanelRepair(self.FtpN,self.Nordic_Lam_ply_quantity,self.h,self.hole_diameter)
             self.metric_data_dico['panel_height'] = {'unit': 'mm', 'value': None}
             self.metric_data_dico['panel_width'] = {'unit': 'mm', 'value': None}
-            self.metric_data_dico['nail_quantity'] = {'unit': None, 'value': None}
+            self.metric_data_dico['panel_nail_quantity'] = {'unit': None, 'value': None}
+            self.metric_data_dico['in_line_nail_spacing'] = {'unit': 'mm', 'value': None}
+            self.metric_data_dico['nail_row_spacing'] = {'unit': 'mm', 'value': None}
             self.imperial_data_dico['panel_height'] = {'unit': 'in', 'value': None}
             self.imperial_data_dico['panel_width'] = {'unit': 'in', 'value': None}
-            self.imperial_data_dico['nail_quantity'] = {'unit': None, 'value': None}
-            (self.metric_data_dico['panel_height']['Value'],
-             self.metric_data_dico['panel_width']['Value'],
-             self.metric_data_dico['nail_quantity']['Value']) = (
-#            self.Panel_h, self.Panel_w, self.NailQty = (
-                    Rfu.PanelRepair(
-                            self.metric_data_dico['FtpN']['value'],
-                            self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
-                            self.metric_data_dico['Nordic_Lam_depth']['value'],
-                            self.metric_data_dico['hole_diameter']['value']))
+            self.imperial_data_dico['panel_nail_quantity'] = {'unit': None, 'value': None}
+            self.imperial_data_dico['in_line_nail_spacing'] = {'unit': 'in', 'value': None}
+            self.imperial_data_dico['nail_row_spacing'] = {'unit': 'in', 'value': None}
+
+            (self.metric_data_dico['panel_height']['value'],
+             self.metric_data_dico['panel_width']['value'],
+             self.metric_data_dico['panel_nail_quantity']['value'],
+             self.metric_data_dico['in_line_nail_spacing']['value'],
+             self.metric_data_dico['nail_row_spacing']['value']) = (
+
+            Rfu.PanelRepair(
+                self.metric_data_dico['FtpN']['value'],
+                self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
+                self.metric_data_dico['Nordic_Lam_depth']['value'],
+                self.metric_data_dico['hole_diameter']['value']))
 
 #-_- Turn this imperial data update in a function
             for selected_key in self.metric_data_dico:
@@ -874,14 +882,26 @@ class MainInt:
             if self.selected_unit.get().lower() == 'imperial':
                 data_dico = self.imperial_data_dico
                 round_at = 2
+                
             elif self.selected_unit.get().lower() == 'metric':
                 data_dico = self.metric_data_dico
                 round_at = 1
             
+            
+#            def try_round_NA(value, round_at=0):
+#                try:
+#                    value = round(value, round_at)
+#                except:
+#                    messagebox.showinfo('Invalid input',f'Value [ {value} ] could not be rounded')
+#                    value = 'NA'
+#                return value
+            
+            ### Create a str conversion function with a try and a 'NA' output exception.
+            ### Also triger a message box with the problem.
+            
         #Column 0 Input values & buttons
             Col = 0
             Ro = 0
-            Width = 300
             Anchor = 'w'
             self.LblPan0 = Label(self.Glued_PanelWindow , text="Results", anchor = 'c').grid(row=Ro, column=Col)       
             Ro+=1
@@ -895,28 +915,25 @@ class MainInt:
             Ro+=2
             self.PanelButton2 = Button(self.Glued_PanelWindow, text='Reference & Info', command=self.OpenFile).grid(row=Ro, column=Col)
             
-            TextOut1Var = ('Repair detail based on full beam height 3/4''"'' CSP'+
-                           '\nplywood installed grain perpendicular to beam span'+
-                           '\n\nPanel fastened to beam with PL Premium or better structural'+
-                           '\nadhesive and 0.131''"'' x 3.25''"'' round head driven nails.')
-            
-###-_- Troubleshooting why the panel_height and with are None.            
-            print(data_dico['panel_height']['value'], data_dico['panel_width']['value'],
-                  data_dico['FtpN']['value'])
-            try:
-                TextOut2Var = ('Panel dimensions: ' +
-                               str(round(data_dico['panel_height']['value'],round_at)) + ' '
-                                + data_dico['panel_height']['unit'] + ' x ' +
-                                str(round(data_dico['panel_width']['value'],round_at)) + ' '
-                                + data_dico['panel_width']['unit'] +
-                               '\nNail minimum quantity: ' + 
-                               str(data_dico['nail_quantity']['value']) +
-                               '\nTension perpendicular to grain: ') 
-
-    #                           + str(round(data_dico['FtpN']['value'])) + ' ' +
-    #                           data_dico['FtpN']['unit'])
-            except:
-                TextOut2Var = ''
+            TextOut1Var = ('Repair detail based on two, full beam height, 3/4''"'' CSP'\
+                           '\nplywood installed grain perpendicular to beam span'\
+                           '\non either sides'\
+                           '\n\nPanel fastened to beam with PL Premium or better structural'\
+                           '\nadhesive and 0.131''"'' x 3.25''"'' round head driven nails.'\
+                           f'\nIn line spacing: {try_round_NA(data_dico["in_line_nail_spacing"]["value"],round_at=round_at)}'\
+                           f' {data_dico["in_line_nail_spacing"]["unit"]}'\
+                           f'\nRow spacing: {try_round_NA(data_dico["nail_row_spacing"]["value"],round_at=round_at)}'\
+                           f' {data_dico["nail_row_spacing"]["unit"]}')
+                           
+            TextOut2Var = (f'Panel dimensions: {try_round_NA(data_dico["panel_height"]["value"],round_at=round_at)}'\
+                            f' {data_dico["panel_height"]["unit"]} x '\
+                            f'{try_round_NA(data_dico["panel_width"]["value"],round_at=round_at)}'\
+                            f' {data_dico["panel_width"]["unit"]}'\
+                            '\nNail minimum quantity: '\
+                            f'{data_dico["panel_nail_quantity"]["value"]}'\
+                            '\nTension perpendicular to grain: '\
+                            f'{try_round_NA(data_dico["FtpN"]["value"])}'\
+                            f' {data_dico["FtpN"]["unit"]}')
                 
             self.PanelOut1Var.set(TextOut1Var)
             self.PanelOut2Var.set(TextOut2Var)
@@ -929,7 +946,7 @@ class MainInt:
                 PanelData = (ReinforceMethod, 
                              self.metric_data_dico['panel_height']['Value'],
                              self.metric_data_dico['panel_width']['value'],
-                             self.metric_data_dico['nail_quantity']['value'])
+                             self.metric_data_dico['panel_nail_quantity']['value'])
                 Input += PanelData
             except:
                 print('invalid data')

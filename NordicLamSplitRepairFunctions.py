@@ -10,6 +10,7 @@ V 6.04 (2019-04-04)
 import XLProcessingTableClass as XLTB
 from tkinter import messagebox
 import math as math
+from UnitConversion import convert
 
 #import for tests only
 #import tkinter
@@ -19,7 +20,13 @@ tblNLRS = XLTB.XLTable(1,SpecFileName)
 Spectbl = tblNLRS.GenDict()
 testvar = Spectbl['PL400']['GRes']
 
-
+def try_round_NA(value, round_at=0):
+    try:
+        value = round(value, round_at)
+    except:
+        messagebox.showinfo('Invalid input',f'Value [ {value} ] could not be rounded')
+        value = 'NA'
+    return value
 
 #Hole reinforcement with screws
 def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offset):
@@ -164,8 +171,8 @@ def PanelRepair(Tp,Ply,h,hd):
     PanelTpIncrease = 2
     GlueEff = tblNLRS.GenDict()['PL400']['GEff'] # (Glue efficiency factor based on handling)
     Panel_h = h #mm
-    InLineSpacing = 76.2 #mm Spaces between nails in one row
-    RowSpacing = 38.1 #mm Spacing between rows (Rows are parallèle to the beam length)
+    in_line_nail_spacing = 76.2 #mm Spaces between nails in one row
+    nail_row_spacing = 38.1 #mm Spacing between rows (Rows are parallèle to the beam length)
 		# This Corn_h dimension should always be maxed to a full beam depth plywood.
 		#(One Day if its worth it, in repair phase 2, there could be a feature to reduce it's size)
     Corn_h = (h-hd)/2 + 0.15 * hd
@@ -185,13 +192,17 @@ def PanelRepair(Tp,Ply,h,hd):
         Panel_w = max(hd + 101.6, hd + GCorn_w * 2)
         print('1 ply Panel_w based on adhesif shear resistance: ',Panel_w,' mm, Default minimum dimension used:',101.6>GCorn_w * 2)
         Panel_w = Panel_wCheck(Tp,PanelQty,h,hd,Panel_w)
-        print('The Panel width after checkup = ',round(Panel_w/1000,2),' m')
-        NailQty = math.ceil(Panel_h * Panel_w / 5800)
+        
+        print('The Panel width after checkup = ',try_round_NA(convert(Panel_w,'mm','m'),round_at=2),' m')
+        try:
+            NailQty = math.ceil(Panel_h * Panel_w / 5800)
+        except:
+            NailQty = None
     elif Ply == 2 or Ply == 3:
         NailQty = math.ceil(Tp * PanelTpIncrease / (PanelQty * NailRes))
-        NRows = math.floor(Corn_h/RowSpacing) -1
+        NRows = math.floor(Corn_h/nail_row_spacing) -1
         NailQty_w = math.ceil(NailQty / NRows)
-        NCorn_w = InLineSpacing * (NailQty_w + 1)
+        NCorn_w = in_line_nail_spacing * (NailQty_w + 1)
         NArea = Corn_h * NCorn_w
         Panel_w1 = max(hd + 101.6, hd + NCorn_w * 2, hd + GCorn_w * 2)
 #        print('From nail resistance Panel width: ',Panel_w1)
@@ -199,17 +210,21 @@ def PanelRepair(Tp,Ply,h,hd):
 #        print('NailQty = math.ceil(Tp * PanelTpIncrease / (PanelQty * NailRes))',NailQty,Tp,PanelTpIncrease,PanelQty,NailRes)        
         print('Minimum nail quantity above and bellow the split area: ',NailQty)
         Panel_w = Panel_wCheck(Tp,PanelQty,h,hd,Panel_w1)
-        print('The Panel Checkup width: ',round(Panel_w/1000,2),' m')
+        print('The Panel Checkup width: ',try_round_NA(convert(Panel_w,'mm','m'),round_at=2),' m')
         print ('Nail panel required area: ',round(NArea,2),' mm\N{SUPERSCRIPT TWO}')
-        print('Nail spacing in mm: ',InLineSpacing,' Row spacing: ',RowSpacing)
-        NailQty = (math.floor(Panel_h/RowSpacing)-1) * (math.floor(Panel_w/InLineSpacing)-1) - math.floor(hd/RowSpacing) * math.floor(hd/InLineSpacing)
+        print('Nail spacing in mm: ',in_line_nail_spacing,' Row spacing: ',nail_row_spacing)
+        try:
+            NailQty = (math.floor(Panel_h/nail_row_spacing)-1) * (math.floor(Panel_w/in_line_nail_spacing)-1) - math.floor(hd/nail_row_spacing) * math.floor(hd/in_line_nail_spacing)
+        except:
+            NailQty = None
     else:
         messagebox.showinfo('Invalid input',"invalide number of Ply. Enter 1, 2 or 3 plies.")
-        Panel_h = 99999
-        Panel_w = 99999
-        NailQty = 99999
-    print('returned values: ','Panel_h: ', round(Panel_h/1000,4),'m Panel_w: ', round(Panel_w/1000,4),'m NailQty: ', NailQty)
-    return Panel_h, Panel_w, NailQty
+        Panel_h = None
+        Panel_w = None
+        NailQty = None
+    print('returned values: ','Panel_h: ', try_round_NA(convert(Panel_h,'mm','m'),round_at=4),
+          'm Panel_w: ', try_round_NA(convert(Panel_w,'mm','m'),round_at=4),'m NailQty: ', NailQty)
+    return Panel_h, Panel_w, NailQty, in_line_nail_spacing, nail_row_spacing
 
 def Panel_wCheck(Tp,PanelQty,h,hd,Panel_w):
 #    print('this is the Panel repair function Tp,PanelQty,h,hd,Panel_w',Tp,PanelQty,h,hd,Panel_w)
@@ -236,7 +251,7 @@ def Panel_wCheck(Tp,PanelQty,h,hd,Panel_w):
         print('Panel width designed: ',round(Panel_w,2),' mm, 2 x beam depth: ',2*h,' mm, Panel too long:',Panel_w > 2 * h)
         print('Panel width too long because greater than 1220mm',Panel_w > 1220)
         messagebox.showinfo('Invalid result',str(round(Panel_w/1000,2)) + ' m panel is too long')
-        Panel_w = 99999
+        Panel_w = None
     else:
         Panel_w = Panel_w
     return Panel_w

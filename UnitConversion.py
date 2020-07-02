@@ -36,6 +36,10 @@ def convert(Val1,Unit1,Unit2):
         Val2 = Val1 * 145.038
     elif Unit1 == 'psi' and Unit2 == 'MPa':
         Val2 = Val1 / 145.038
+    elif Unit1 == 'unit' and Unit2 == 'k':
+        Val2 = Val1 / 1000
+    elif Unit1 == 'mm' and Unit2 == 'm':
+        Val2 = Val1 / 1000
     elif Unit1 == None and Unit2 == None:
         Val2 = Val1
     else:
