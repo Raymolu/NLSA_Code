@@ -44,14 +44,14 @@ def B_Eval(Mf,Mr,hd,h):
             CMr = (h-hd)/h*Mr
             Eval = Mf/CMr
         except:
-            CMr = 0
-            Eval = 99999
+            CMr = None
+            Eval = None
     else:
         messagebox.showinfo("Bending Calculation Error Message","Please correct the input value: [hd] (hd <= (h-4in))")
         print('Less than minimum top and bottom lamella left (4" (101.6mm))')
         print('repair for tension reinforcement parallel and perpendicular to grain')
-        CMr = 0
-        Eval = 99999
+        CMr = None
+        Eval = None
     #Corrected Allowed bending     
     return Eval, CMr
 
@@ -95,14 +95,15 @@ def S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):
             CShearRes=Phi*Fv*2/3*Ag*Ply
             Eval=Vf/CShearRes
         else:
-            CShearRes=0 
-            Eval=99999
-            Fv=0            
+            CShearRes=None 
+            Eval=None
+            Fv=None            
     else:
-        messagebox.showinfo("Shear Calculation Error Message","Select valid h ("+str(h)[0:5]+") and b ("+str(b)[0:5]+"). Max h = "+str(Maxh)+" Max b = "+str(Maxb))
-        CShearRes=0 
-        Eval=99999
-        Fv=0
+        messagebox.showinfo("Shear Calculation Error Message",
+                            "Select valid h ("+str(h)[0:5]+") and b ("+str(b)[0:5]+"). Max h = "+str(Maxh)+" Max b = "+str(Maxb))
+        CShearRes=None 
+        Eval=None
+        Fv=None
     return Eval, CShearRes, Fv
 
 
@@ -121,7 +122,7 @@ def P_Tension(NLType,h,b,hd,Vf,Mf,Ply):
             try:            
                 Bending_tp = 0.008*Mf/((h-hd)/2+0.15*hd)
             except:
-                Bending_tp = 99999999
+                Bending_tp = None
         else:
             Bending_tp = (3*Mf*hd**3*(hd+h))/(4*h**3*(h*hd+h**2+hd**2)) 
             print('Alternate Bending_tp equation used\nMore conservative than DIN 1052 equation')
@@ -150,14 +151,13 @@ def P_Tension(NLType,h,b,hd,Vf,Mf,Ply):
         print('Bending_tp = ',Bending_tp, ' N')
     else:
         messagebox.showinfo("Perpendicular Tension Calculation Error Message","Select valid h ("+str(h)[0:5]+") and b ("+str(b)[0:5]+"). Max h = "+str(Maxh)+" Max b = "+str(Maxb))
-        FtpN = 0
-        FtpRes = 0
-        Ftp = 0
-        Eval = 99999
+        FtpN = None
+        FtpRes = None
+        Ftp = None
+        Eval = None
     return Eval, Ftp, FtpRes, FtpN
 
 #Pass spec data
-@try_catch
 def NLSpecs():
     NLSpecs=tbNL.XLToTable()
     return NLSpecs
@@ -169,15 +169,17 @@ def NLSpecs():
             
             Validate that the hole placement requirements are met.
     '''   
+@try_catch
 def B700_Eval(Mf,Mr,hd,h):
     if hd <= 2/3*h:
         Eval, CMr = B_Eval(Mf,Mr,hd,h)
     else:
         messagebox.showinfo("APA 700 Bending Calculation Error Message","Please correct the input value: [hd] (hd <= 2/3*h)")
-        CMr = 0
-        Eval = 99999        
+        CMr = None
+        Eval = None        
     return Eval, CMr
 
+@try_catch
 def S700_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):   
     if (hd <= 2/3*h and h <= Maxh and b <= Maxb):
         # Use equation (a) or (b) methodes
@@ -202,9 +204,9 @@ def S700_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):
         messagebox.showinfo("APA 700 Shear Calculation Error Message","Validate parameters: h ("+str(h)[0:5]+"), b ("
                             +str(b)[0:5]+') and [hd]' +' hd/h = '+ str(round(hd/h,2)) + "." + "\n" +
                             " Max h = "+str(Maxh)+"; Max b = "+str(Maxb) + "; (hd/h <= 2/3 [0.67])")
-        CShearRes=0 
-        Eval=99999
-        Fv=0      
+        CShearRes=None 
+        Eval=None
+        Fv=None      
     return Eval, CShearRes, Fv
 
 #print(B700_Eval(1000,2000,250,300))

@@ -6,10 +6,13 @@ V 6.04 (2019-04-04)
 @author: ludovicraymond
 """
 def convert(Val1,Unit1,Unit2):
-    if Val1 == None:
+    if type(Val1) == type('string'):
+        Val2 = Val1
+    if Val1 == None or Val1 == "" or  Val1 == 0:
         Val2 = None
     elif Unit1 == 'in' and Unit2 == 'mm':
         Val2 = Val1 * 25.4
+
     elif Unit1 == 'mm' and Unit2 == 'in':
         Val2 = Val1 / 25.4
     elif Unit1 == 'ft' and Unit2 == 'm':
@@ -40,6 +43,10 @@ def convert(Val1,Unit1,Unit2):
         Val2 = Val1 / 1000
     elif Unit1 == 'mm' and Unit2 == 'm':
         Val2 = Val1 / 1000
+    elif Unit1 == 'N/mm' and Unit2 == 'lb/in':
+        Val2 = Val1 * 5.710147
+    elif Unit1 == 'lb/in' and Unit2 == 'N/mm':
+        Val2 = Val1 / 5.710147
     elif Unit1 == None and Unit2 == None:
         Val2 = Val1
     else:

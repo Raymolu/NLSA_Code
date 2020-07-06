@@ -11,6 +11,7 @@ import XLProcessingTableClass as XLTB
 from tkinter import messagebox
 import math as math
 from UnitConversion import convert
+from NordicLamSplitAnalysisFunctions import try_catch
 
 #import for tests only
 #import tkinter
@@ -24,11 +25,12 @@ def try_round_NA(value, round_at=0):
     try:
         value = round(value, round_at)
     except:
-        messagebox.showinfo('Invalid input',f'Value [ {value} ] could not be rounded')
+        print (f'Value [ {value} ] could not be rounded')
         value = 'NA'
     return value
 
 #Hole reinforcement with screws
+@try_catch
 def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offset):
     '''
         Tp: Tension perpendicular to wood fibres N (For all plies)
@@ -48,8 +50,8 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
         print('No hole offset considered')
     else:
         messagebox.showinfo('Design Failure',str(round(Offset,2))+'mm offset should be corrected')
-        Tp = 99999
-        return 0, 0, 0
+        Tp = None
+        return None, None, None
 
     # Thread length calculations based on tension perpendicular to fibres    
     ThreadL = Tp/(ScrewRes * ScrewQty * Ply)
@@ -61,7 +63,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
         print(round(ScrewTL,2),'mm left screw tip side section')
     else:
         print('ScrewTL Fail')
-        ScrewTL = 99999
+        ScrewTL = None
 
     # Screw Head Left
     ScrewHL = max((h-hd)/2 + Offset + 0.15*hd,ThreadL)
@@ -69,7 +71,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
         print(round(ScrewHL,2),'mm left screw head side section')
     else:
         print('ScrewHL Fail')
-        ScrewHL = 99999
+        ScrewHL = None
     
 ### Same Side method (to test)
     if Method == 'Same Side':
@@ -80,7 +82,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
             print(round(ScrewTR,2),'mm right screw tip side section')
         else:
             print('ScrewTR Fail')
-            ScrewTR = 99999
+            ScrewTR = None
     
         # Screw Head Right
         ScrewHR = h - (h-hd)/2 + Offset - 0.15*hd
@@ -88,7 +90,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
             print(round(ScrewHR,2),'mm right screw head side section')
         else:
             print('ScrewHR Fail')
-            ScrewHR = 99999
+            ScrewHR = None
 
 ### Opposed Side (to test)
     elif Method == 'Opposed Side':
@@ -99,7 +101,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
             print(round(ScrewTR,2),'mm right screw tip side section')
         else:
             print('ScrewTR Fail')
-            ScrewTR = 99999
+            ScrewTR = None
 
         # Screw Head Right 
         ScrewHR = max((h-hd)/2 - Offset + 0.15*hd,ThreadL)
@@ -107,13 +109,13 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
             print(round(ScrewHR,2),'mm right screw head side section')
         else:
             print('ScrewHR Fail')
-            ScrewHR = 99999
+            ScrewHR = None
     else:
         messagebox.showinfo('Error message','Trouble with the screw orientation selection')
-        ScrewTL = 99999
-        ScrewHL = 99999
-        ScrewTR = 99999
-        ScrewHR = 99999
+        ScrewTL = None
+        ScrewHL = None
+        ScrewTR = None
+        ScrewHR = None
         
     #Screw length calculation on left and right side of hole
     ScrewL = ScrewTL + ScrewHL
@@ -130,7 +132,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
         print(round(MaxScrew,4),' mm required screw is too long for the beam depth tolerance. Change screw type or quantity')
         messagebox.showinfo('Design Failure',str(round(MaxScrew,2))+' mm required screw is too long for the beam depth tolerance.'
                             +'\nChange screw type or quantity')
-        MaxScrew = 99999
+        MaxScrew = None
     
     #Validate Screw tensil strength is sufficient.
     if ScrewResAbs * ScrewQty >= Tp:
@@ -138,7 +140,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
     else:
         print('Selected screw fails tensil resistance')
         messagebox.showinfo('Design Failure','Selected screw fails tensil resistance')
-        return 99999, 99999, Tp
+        return None, None, Tp
     
     #Evaluate minimum spacing to avoid splitting
     ScrewEdSpa = 3 * ScrewTip # mm
@@ -151,6 +153,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
     return MaxScrew, ThreadL, Tp
 
 #Hole reinforcement with panels
+@try_catch
 def PanelRepair(Tp,Ply,h,hd):
     '''
         Tp: Tension perpendicular to wood fibres N (For all plies)
