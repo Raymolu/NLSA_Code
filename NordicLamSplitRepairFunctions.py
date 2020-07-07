@@ -19,7 +19,7 @@ from NordicLamSplitAnalysisFunctions import try_catch
 SpecFileName = "NLRepairSpecs.xlsx"
 tblNLRS = XLTB.XLTable(1,SpecFileName)
 Spectbl = tblNLRS.GenDict()
-testvar = Spectbl['PL400']['GRes']
+testvar = Spectbl['PLPremium']['GRes']
 
 def try_round_NA(value, round_at=0):
     try:
@@ -31,7 +31,7 @@ def try_round_NA(value, round_at=0):
 
 #Hole reinforcement with screws
 @try_catch
-def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offset):
+def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,ply_width,h,hd,Method,Offset):
     '''
         Tp: Tension perpendicular to wood fibres N (For all plies)
         ScrewQty: number of screws per ply per side of hole. Note that all screws must be at the same distance of the opening.
@@ -96,7 +96,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
     elif Method == 'Opposed Side':
 
         # Screw Tip Right
-        ScrewTR = max(ThreadL + ScrewTip,hd - 0.15*hd + 40) # mm
+        ScrewTR = max(ThreadL + ScrewTip, hd - 0.15*hd + 40) # mm
         if ScrewTR <= (h-hd)/2 + Offset + hd - 0.15*hd:
             print(round(ScrewTR,2),'mm right screw tip side section')
         else:
@@ -135,7 +135,7 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
         MaxScrew = None
     
     #Validate Screw tensil strength is sufficient.
-    if ScrewResAbs * ScrewQty >= Tp:
+    if ScrewResAbs * ScrewQty * Ply >= Tp:
         print('Screw tensil strenght can resist the tension perpendicular to wood fibres')
     else:
         print('Selected screw fails tensil resistance')
@@ -145,10 +145,10 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,b,h,hd,Method,Offs
     #Evaluate minimum spacing to avoid splitting
     ScrewEdSpa = 3 * ScrewTip # mm
     ScrewSpa = 2.5 * ScrewTip # mm
-    if 2 * ScrewEdSpa + ( ScrewQty - 1 ) * ScrewSpa > b:
+    if 2 * ScrewEdSpa + ( ScrewQty - 1 ) * ScrewSpa > ply_width:
         print('Impossible to fit all screws','Screw edge distance: ',ScrewEdSpa,' mm and screw spacing: ',ScrewSpa,' mm')
         messagebox.showinfo('Design Failure','Screw placement is invalid\nChange screw quantity')
-        MaxScrew = 0
+        MaxScrew = None
 
     return MaxScrew, ThreadL, Tp
 
@@ -165,14 +165,14 @@ def PanelRepair(Tp,Ply,h,hd):
         Tp / 2 because of number of plywood.
 	'''
     #Parameter from table
-    GlueRes = tblNLRS.GenDict()['PL400']['GRes']
+    GlueRes = tblNLRS.GenDict()['PLPremium']['GRes']
     NailRes = tblNLRS.GenDict()['Nail_0.131x3.25']['NRes']
     print('Glue shear resistance (N/mm\N{SUPERSCRIPT TWO}): ',GlueRes,'; Shear resistance per nail (N): ',NailRes)
     
     #Hard coded parameters. (might get turned into user input in the next phase)
     PanelQty = 2
     PanelTpIncrease = 2
-    GlueEff = tblNLRS.GenDict()['PL400']['GEff'] # (Glue efficiency factor based on handling)
+    GlueEff = tblNLRS.GenDict()['PLPremium']['GEff'] # (Glue efficiency factor based on handling)
     Panel_h = h #mm
     in_line_nail_spacing = 76.2 #mm Spaces between nails in one row
     nail_row_spacing = 38.1 #mm Spacing between rows (Rows are parallèle to the beam length)

@@ -115,6 +115,7 @@ def P_Tension(NLType,h,b,hd,Vf,Mf,Ply):
         If h >=17.72in (450mm): The Kt,90 will need to be calculated
         hd: Hole diameter, mm
         Mf: bending force in Nmm (typicaly we input and display Mf in Nm)
+        The Ftp and FtpN are calculated for all the plies together.
     """
     #   Note: For round holes only!!!
     if h <= Maxh and b <= Maxb:
@@ -134,14 +135,16 @@ def P_Tension(NLType,h,b,hd,Vf,Mf,Ply):
 #        print(FtpRes,' VS ',float(tbNL.GenDict()[NLType]['Ftp']))
 
         Shear_tp = Vf*hd*(3*h**2-hd**2)/(4*h**3)
-        # FtpO is the strain in the wood section with the opening. The divider is multiplied by the number of ply instead of deviding the forces. 
+        # FtpO is the strain (MPa) in the wood section with the opening.
+        # The divider is multiplied by the number of ply instead of deviding the forces. 
         FtpO = (Shear_tp + Bending_tp)/(0.5*(0.35*hd+0.5*h)*b*Ply)
         FtpNO = Shear_tp + Bending_tp #Perpendicular tension force in N
         if h <= 400:
             Ftp = FtpO
             FtpN = FtpNO
         else:
-            #Apply the tension amplifier. ANALYSIS AND DESIGN OF LAMINATED VENEER LUMBER BEAMS WITH HOLES, by Manoochehr Ardalany, University of Canterbury, September 2012 section 8.5
+            #Apply the tension amplifier.
+            #ANALYSIS AND DESIGN OF LAMINATED VENEER LUMBER BEAMS WITH HOLES, by Manoochehr Ardalany, University of Canterbury, September 2012 section 8.5
             Ftp = ((h/400)**0.5)*FtpO
             FtpN = ((h/400)**0.5)*FtpNO
             print('Tension strain "MPa" amplified for a beam deeper than 400mm')

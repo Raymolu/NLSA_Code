@@ -29,16 +29,16 @@ class MainInt:
             self.In=str()
             self.selected_unit = StringVar()
             self.selected_calc_method = StringVar()
-            self.Reinforce = StringVar()
+            self.reinforcement_type = StringVar()
             self.shear_method_a_used = StringVar() 
-            self.ScrewOri = StringVar()
+            self.screw_configuration = StringVar()
             self.imperial_data_dico = {}
             self.metric_data_dico = {}
             self.UnitDict = {}
             self.Units = ['Imperial','Metric']
             self.calc_methods = ['CSA & Euro','APA 700']
-            self.Reinforces = ['ASSY Screw','Glued Panel']
-            self.ScrewOris = ['Same Side','Opposed Side']
+            self.reinforcement_types = ['ASSY Screw','Glued Panel']
+            self.screw_configurations = ['Same Side','Opposed Side']
             ValUnit = ['Nordic_Lam_thickness','Nordic_Lam_depth','hole_diameter',
                        'bending_force_Mf','bending_resistance_Mr','shear_force_Vf',
                        'max_beam_length','shear_force_Wf','shear_resistance_Wr']
@@ -57,8 +57,8 @@ class MainInt:
             self.Nordic_Lam_depth_List = []
             self.selected_unit.set(self.Units[1])
             self.selected_calc_method.set(self.calc_methods[0])
-            self.Reinforce.set(self.Reinforces[0])
-            self.ScrewOri.set(self.ScrewOris[0])
+            self.reinforcement_type.set(self.reinforcement_types[0])
+            self.screw_configuration.set(self.screw_configurations[0])
             self.shear_method_a_used.set(0) 
             if os.getlogin() == PowerUser:
                 self.selected_unit.set(self.Units[0])
@@ -259,8 +259,8 @@ class MainInt:
             self.Out402Vf = StringVar()
             self.Out402 = Label(master, textvariable=self.Out402Vf, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.Out403Ftp = StringVar()
-            self.Out403 = Label(master, textvariable=self.Out403Ftp, width = Width).grid(row=Ro, column=Col)
+            self.Out403_tension_strain_perpendicular = StringVar()
+            self.Out403 = Label(master, textvariable=self.Out403_tension_strain_perpendicular, width = Width).grid(row=Ro, column=Col)
             
             Ro+=2
             Anchor = 'w'
@@ -272,9 +272,9 @@ class MainInt:
             Ro+=1
             self.RB5=Radiobutton(master, text=self.calc_methods[1], variable=self.selected_calc_method, value=self.calc_methods[1], command = lambda : print(self.selected_calc_method.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=2
-            self.RB7=Radiobutton(master, text=self.Reinforces[0], variable=self.Reinforce, value=self.Reinforces[0], command = lambda : print(self.Reinforce.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB7=Radiobutton(master, text=self.reinforcement_types[0], variable=self.reinforcement_type, value=self.reinforcement_types[0], command = lambda : print(self.reinforcement_type.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.RB8=Radiobutton(master, text=self.Reinforces[1], variable=self.Reinforce, value=self.Reinforces[1], command = lambda : print(self.Reinforce.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB8=Radiobutton(master, text=self.reinforcement_types[1], variable=self.reinforcement_type, value=self.reinforcement_types[1], command = lambda : print(self.reinforcement_type.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
 
         #Column 5 Output Resistance
             Col += 1
@@ -289,8 +289,8 @@ class MainInt:
             self.Out502CVr = StringVar()
             self.Out502 = Label(master, textvariable=self.Out502CVr, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.Out503FtpRes = StringVar()
-            self.Out503 = Label(master, textvariable=self.Out503FtpRes, width = Width).grid(row=Ro, column=Col)
+            self.Out503_tension_strain_perpendicular_resistance = StringVar()
+            self.Out503 = Label(master, textvariable=self.Out503_tension_strain_perpendicular_resistance, width = Width).grid(row=Ro, column=Col)
 
         #Reinforcement Output            
             Ro+=10
@@ -330,7 +330,7 @@ class MainInt:
             if os.getlogin() == PowerUser:
                 self.input_Nordic_Lam_type_1.delete(0,END)
                 self.input_Nordic_Lam_type_1.insert(0,fu.tbNL.SeriesName()[0])
-                self.Reinforce.set(self.Reinforces[1])
+                self.reinforcement_type.set(self.reinforcement_types[1])
 
         def pass_data_from_metric_to_imperial_dico(self):
             '''
@@ -416,10 +416,10 @@ class MainInt:
                             ['EvalV',None,None],
                             ['K_D',None,None],
                             ['K_H',None,None],
-                            ['Ftp','psi','MPa'],
-                            ['FtpRes','psi','MPa'],
+                            ['tension_strain_perpendicular','psi','MPa'],
+                            ['tension_strain_perpendicular_resistance','psi','MPa'],
                             ['Evaltp',None,None],
-                            ['FtpN','lb','N'],
+                            ['tension_force_perpendicular','lb','N'],
                             ['Fv','psi','MPa']
                             ]
 
@@ -542,9 +542,9 @@ class MainInt:
 
             try:
                 (self.metric_data_dico['Evaltp']['value'], 
-                 self.metric_data_dico['Ftp']['value'], 
-                 self.metric_data_dico['FtpRes']['value'], 
-                 self.metric_data_dico['FtpN']['value'] ) = (
+                 self.metric_data_dico['tension_strain_perpendicular']['value'], 
+                 self.metric_data_dico['tension_strain_perpendicular_resistance']['value'], 
+                 self.metric_data_dico['tension_force_perpendicular']['value'] ) = (
                         fu.P_Tension(
                             self.metric_data_dico['Nordic_Lam_type']['value'],
                             self.metric_data_dico['Nordic_Lam_depth']['value'],
@@ -555,9 +555,9 @@ class MainInt:
                             self.metric_data_dico['Nordic_Lam_ply_quantity']['value']))
             except:
                 (self.metric_data_dico['Evaltp']['value'], 
-                 self.metric_data_dico['Ftp']['value'], 
-                 self.metric_data_dico['FtpRes']['value'], 
-                 self.metric_data_dico['FtpN']['value'] ) = (None,)*4
+                 self.metric_data_dico['tension_strain_perpendicular']['value'], 
+                 self.metric_data_dico['tension_strain_perpendicular_resistance']['value'], 
+                 self.metric_data_dico['tension_force_perpendicular']['value'] ) = (None,)*4
                 print('perpendicular tension calculations failed to load due to invalid inputs')
 
             #Find the maximum length in m to be able to use shear equation 7.5.7.2 (b)
@@ -579,13 +579,13 @@ class MainInt:
 #                                self.metric_data_dico[selected_key]['unit'],
 #                                self.imperial_data_dico[selected_key]['unit']))
 
-            data_dico, Ftp_round_factor = self.dico_in_use(0,3)
+            data_dico, tension_strain_perpendicular_round_factor = self.dico_in_use(0,3)
 #            if selected_unit == 'imperial':
 #                data_dico = self.imperial_data_dico
-#                Ftp_round_factor = 0
+#                tension_strain_perpendicular_round_factor = 0
 #            elif selected_unit == 'metric':
 #                data_dico = self.metric_data_dico
-#                Ftp_round_factor = 3
+#                tension_strain_perpendicular_round_factor = 3
 
             #Set the maximum length to be able to use shear equation 7.5.7.2 (b)
             self.ShearMaxLength.set(str(round(data_dico['Nordic_Lam_depth']['value'],0)))
@@ -593,8 +593,8 @@ class MainInt:
             print('Residual Mr = ',
                   data_dico['CMr']['value'],'; Residual shear resistance = ',
                   data_dico['CShearRes']['value'],'; tp Force = ',
-                  data_dico['Ftp']['value'], ' MPa ; tp Resistance = ',
-                  data_dico['FtpRes']['value'],' MPa')
+                  data_dico['tension_strain_perpendicular']['value'], ' MPa ; tp Resistance = ',
+                  data_dico['tension_strain_perpendicular_resistance']['value'],' MPa')
 
             #Bending output display on interface
             self.Out401bending_force_Mf.set (
@@ -625,12 +625,12 @@ class MainInt:
                         f'{try_round_NA(data_dico["EvalV"]["value"],round_at=2)}')
 
             #Tension perpendicular to grain output display on interface
-            self.Out403Ftp.set (
-                        f'{try_round_NA(data_dico["Ftp"]["value"],round_at=Ftp_round_factor)}'\
-                        f' {data_dico["Ftp"]["unit"]}')
-            self.Out503FtpRes.set (
-                        f'{try_round_NA(data_dico["FtpRes"]["value"],round_at=Ftp_round_factor)}'\
-                        f' {data_dico["FtpRes"]["unit"]}')
+            self.Out403_tension_strain_perpendicular.set (
+                        f'{try_round_NA(data_dico["tension_strain_perpendicular"]["value"],round_at=tension_strain_perpendicular_round_factor)}'\
+                        f' {data_dico["tension_strain_perpendicular"]["unit"]}')
+            self.Out503_tension_strain_perpendicular_resistance.set (
+                        f'{try_round_NA(data_dico["tension_strain_perpendicular_resistance"]["value"],round_at=tension_strain_perpendicular_round_factor)}'\
+                        f' {data_dico["tension_strain_perpendicular_resistance"]["unit"]}')
             self.Out603TP.set (
                         f'{try_round_NA(data_dico["Evaltp"]["value"],round_at=2)}')
             return data_dico
@@ -641,9 +641,23 @@ class MainInt:
 
         def Reinforcement(self):
             self.InputProcess()
-            if self.Reinforce.get() == self.Reinforces[0]:
+            
+            reinforcement_data_key_list = [
+                                        ['reinforcement_type',None,None],
+                                        ]
+
+            self.add_receptecals_to_data_dico(reinforcement_data_key_list) 
+            self.metric_data_dico['screw_oreinforcement_type']['value'] = (
+                    self.reinforcement_type.get())
+            self.pass_data_from_metric_to_imperial_dico()
+            
+            
+            
+            if self.metric_data_dico['screw_oreinforcement_type']['value'] == (
+                    self.reinforcement_types[0]):
                 self.ASSY_ScrewGUI()
-            elif  self.Reinforce.get() == self.Reinforces[1]:
+            elif  self.metric_data_dico['screw_oreinforcement_type']['value'] == (
+                    self.reinforcement_types[1]):
                 try:
                     self.Glued_PanelWindow.destroy()            
                 except:
@@ -695,9 +709,9 @@ class MainInt:
 
         #Column 0 Radio Buttons
             Ro+=2
-            self.RBSO1=Radiobutton(self.ASSY_ScrewWindow, text=self.ScrewOris[0], variable=self.ScrewOri, value=self.ScrewOris[0], command = lambda : print(self.Reinforce.get()), anchor = Anchor, width = Width-5).grid(row=Ro, column=Col)
+            self.RBSO1=Radiobutton(self.ASSY_ScrewWindow, text=self.screw_configurations[0], variable=self.screw_configuration, value=self.screw_configurations[0], command = lambda : print(self.reinforcement_type.get()), anchor = Anchor, width = Width-5).grid(row=Ro, column=Col)
             Ro+=1
-            self.RBSO2=Radiobutton(self.ASSY_ScrewWindow, text=self.ScrewOris[1], variable=self.ScrewOri, value=self.ScrewOris[1], command = lambda : print(self.Reinforce.get()), anchor = Anchor, width = Width-5).grid(row=Ro, column=Col)
+            self.RBSO2=Radiobutton(self.ASSY_ScrewWindow, text=self.screw_configurations[1], variable=self.screw_configuration, value=self.screw_configurations[1], command = lambda : print(self.reinforcement_type.get()), anchor = Anchor, width = Width-5).grid(row=Ro, column=Col)
 
 
         #Column 0 Buttons
@@ -713,7 +727,7 @@ class MainInt:
             Ro = 1
             Width = 20
             Anchor = 'w'
-            self.LblIn1 = Label(self.ASSY_ScrewWindow , text="Screw Per side", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.LblIn1 = Label(self.ASSY_ScrewWindow , text="Screw/ply on one side of hole", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
             Ro+=1
             self.LblIn2 = Label(self.ASSY_ScrewWindow , text="Screw Type", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
             Ro+=1
@@ -825,44 +839,88 @@ class MainInt:
 
 ### -_- Add screw repair info to the self.metric_data_dico and update the imperial_data_dico for the reports    
             
+            screw_repair_data_key_list = [
+                                        ['screw_quantity',None,None],
+                                        ['screw_configuration',None,None]
+                                        ['highest_screw_length','in','mm'],
+                                        ['calculated_screw_thread','in','mm'],
+                                        ['tension_force_perpendicular_offset_increase','lb','N'],
+                                        ]
+
+            self.add_receptecals_to_data_dico(screw_repair_data_key_list)
+
             if self.metric_data_dico['screw_offset']['value'] > (
                     self.metric_data_dico['Nordic_Lam_depth']['value'] * 0.1):
                 messagebox.showinfo("Error Message",
-                    f"Please correct the offset value: {self.metric_data_dico['screw_offset']['value']}"\
-                    f" to a value within {str(round(self.metric_data_dico['Nordic_Lam_depth']['value'] * 0.1,2))}")
+                    f"Please correct the offset value: {self.metric_data_dico['screw_offset']['value']}mm"\
+                    f" to a value within {str(round(self.metric_data_dico['Nordic_Lam_depth']['value'] * 0.1,2))}mm")
                 return 
             else:
                 try:
-                    self.ScrewQty = int(self.ScrewInput1.get())
-                    if self.ScrewQty * self.screw_pull_out_resistance * self.scres_absolute_tension_resistance_TStr * self.screw_tip > 0:
-                        MaxScrew, ThreadL, TpScrew = Rfu.ScrewRepair(self.FtpN,self.ScrewQty,self.screw_pull_out_resistance,self.scres_absolute_tension_resistance_TStr,self.screw_tip,self.Nordic_Lam_ply_quantity,b,self.h,self.hole_diameter,self.ScrewOri.get(),self.screw_offset)
-                        print('length: ' + str(round(MaxScrew,4)) + 'mm  Thread: ' + str(round(ThreadL,4)))
-                        self.ScrewOut4Var.set(round(MaxScrew,2))
-#                        self.ScrewOut5Var.set(round(self.FtpN,2))
-                        self.ScrewOut5Var.set(round(TpScrew,2))
+                    self.metric_data_dico['screw_quantity']['value'] = int(self.ScrewInput1.get())
+                    self.metric_data_dico['screw_configuration']['value'] = self.screw_configuration.get()
+                    
+
+                    if (self.metric_data_dico['screw_quantity']['value'] *
+                        self.metric_data_dico['screw_pull_out_resistance']['value'] *
+                        self.metric_data_dico['scres_absolute_tension_resistance_TStr']['value'] *
+                        self.metric_data_dico['screw_tip']['value']) > 0:
+                        
+                            (self.metric_data_dico['highest_screw_length']['value'],
+                             self.metric_data_dico['calculated_screw_thread']['value'],
+                             self.metric_data_dico['tension_force_perpendicular_offset_increase']['value']) = (
+                                Rfu.ScrewRepair(
+                                self.metric_data_dico['tension_force_perpendicular']['value'],
+                                self.metric_data_dico['screw_quantity']['value'],
+                                self.metric_data_dico['screw_pull_out_resistance']['value'],
+                                self.metric_data_dico['scres_absolute_tension_resistance_TStr']['value'],
+                                self.metric_data_dico['screw_tip']['value'],
+                                self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
+                                self.metric_data_dico['Nordic_Lam_thickness']['value'],
+                                self.metric_data_dico['Nordic_Lam_depth']['value'],
+                                self.metric_data_dico['hole_diameter']['value'],
+                                self.metric_data_dico['screw_configuration']['value'],
+                                self.metric_data_dico['screw_offset']['value']
+                                ))
+                        
+                        print(f"length: "\
+                              f"{round(self.metric_data_dico['highest_screw_length']['value'],4)}"\
+                              f"{self.metric_data_dico['highest_screw_length']['unit']}"\
+                              f"Thread: "\
+                              f"{round(self.metric_data_dico['calculated_screw_thread']['value'],4)}"\
+                              f"{self.metric_data_dico['calculated_screw_thread']['unit']}")
+                                
+                        self.ScrewOut4Var.set(round(
+                                self.metric_data_dico['highest_screw_length']['value'],2))
+                        self.ScrewOut5Var.set(round(
+                                self.metric_data_dico['tension_force_perpendicular_offset_increase'
+                                                      ]['value'],2))
                     else:
-                        MaxScrew = 99999
-                        ThreadL = 99999
-                        self.ScrewOut4Var.set(round(MaxScrew,2))
+                        self.metric_data_dico['highest_screw_length']['value'] = None
+                        self.metric_data_dico['calculated_screw_thread']['value'] = None
+                        self.ScrewOut4Var.set(round(
+                                self.metric_data_dico['highest_screw_length']['value'],2))
                         print('Input screw quantity and type')
                 except:
-                    MaxScrew = 99999
-                    ThreadL = 99999
-                    self.ScrewOut4Var.set(round(MaxScrew,2))
+                    self.metric_data_dico['highest_screw_length']['value'] = None
+                    self.metric_data_dico['calculated_screw_thread']['value'] = None
+                    self.ScrewOut4Var.set('NA')
                     print('Error, Input screw quantity and type')
-            return self.Reinforce.get(), self.ScrewOri.get(), self.metric_data_dico['screw_type']['value'], self.ScrewQty, MaxScrew, ThreadL, self.screw_pull_out_resistance, self.screw_offset, TpScrew
+
+                self.pass_data_from_metric_to_imperial_dico()
+            return
         
         def ReportScrew(self):
             try:
                 ScrewData = self.ASSY_ScrewCal()
-                MaxScrew = ScrewData[4]
-                print(MaxScrew)
+                highest_screw_length = ScrewData[4]
+                print(highest_screw_length)
                 Input = self.Input
                 Input += ScrewData
             except:
                 print('invalid data')
             Re.Report(Input)
-            if MaxScrew !=0: self.ASSY_ScrewWindow.destroy()
+            if highest_screw_length !=0: self.ASSY_ScrewWindow.destroy()
 
         ### Panel GUI and functions    
         def Glued_PanelGUI(self):  
@@ -892,13 +950,13 @@ class MainInt:
                  self.metric_data_dico['in_line_nail_spacing']['value'],
                  self.metric_data_dico['nail_row_spacing']['value']) = (
                 Rfu.PanelRepair(
-                    self.metric_data_dico['FtpN']['value'],
+                    self.metric_data_dico['tension_force_perpendicular']['value'],
                     self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
                     self.metric_data_dico['Nordic_Lam_depth']['value'],
                     self.metric_data_dico['hole_diameter']['value']))
             except:
                 print('Panel repair function failed to load:\n'\
-                      f"{self.metric_data_dico['FtpN']['value']}, "\
+                      f"{self.metric_data_dico['tension_force_perpendicular']['value']}, "\
                       f"{self.metric_data_dico['Nordic_Lam_ply_quantity']['value']}, "\
                       f"{self.metric_data_dico['Nordic_Lam_depth']['value']}, "\
                       f"{self.metric_data_dico['hole_diameter']['value']}")
@@ -954,8 +1012,8 @@ class MainInt:
                             '\nNail minimum quantity: '\
                             f'{data_dico["panel_nail_quantity"]["value"]}'\
                             '\nTension perpendicular to grain: '\
-                            f'{try_round_NA(data_dico["FtpN"]["value"])}'\
-                            f' {data_dico["FtpN"]["unit"]}')
+                            f'{try_round_NA(data_dico["tension_force_perpendicular"]["value"])}'\
+                            f' {data_dico["tension_force_perpendicular"]["unit"]}')
                 
             self.PanelOut1Var.set(TextOut1Var)
             self.PanelOut2Var.set(TextOut2Var)
