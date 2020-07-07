@@ -15,7 +15,31 @@ from tkinter import messagebox
 
 SheetNRep = 'Report'
 
-def Report(Input):
+###-_-
+### Update: Add to selected deco the V or W values based on the Shear equation value. 
+# special Vf or Wf new var = 'shear_force', special Vr or Wr new var = 'shear_resistance', 
+### ADD shear_resistance_Vf
+
+def Report(selected_data_dico):
+    if selected_data_dico['shear_method_a_used']['value'] == 1:
+        selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Wf']['value']
+        selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Wf']['value']
+    elif selected_data_dico['shear_method_a_used']['value'] == 0:
+        selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Vf']['value']
+        selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Vf']['value']    
+    
+    ## Read template create new sheat with date and name etc...
+    ## Replace each cell with the proper data based on lookup
+    ## Add the information, project etc...
+    ## Add the format
+    
+    
+    
+    return
+
+
+
+def old_Report(Input):
     #Generates the data to be displayed in the excel spread sheet
     #Remove Notes from function input to use it elsewere as the variable Note
     ValList = []

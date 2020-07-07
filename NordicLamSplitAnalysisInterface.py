@@ -283,8 +283,8 @@ class MainInt:
             Ro+=3
             self.LblHead5 = Label(master, text="Resistance").grid(row=Ro, column=Col)
             Ro+=1
-            self.Out501CMr = StringVar()
-            self.Out501 = Label(master, textvariable=self.Out501CMr, width = Width).grid(row=Ro, column=Col)
+            self.Out501_reduced_bending_resistance = StringVar()
+            self.Out501 = Label(master, textvariable=self.Out501_reduced_bending_resistance, width = Width).grid(row=Ro, column=Col)
             Ro+=1
             self.Out502CVr = StringVar()
             self.Out502 = Label(master, textvariable=self.Out502CVr, width = Width).grid(row=Ro, column=Col)
@@ -350,12 +350,11 @@ class MainInt:
                           f"[ {selected_key} ] could not be converted")
             pass
 
-        def dico_in_use (self,imperial_rounding, metric_rounding):
+        def dico_in_use (self):
             '''
                 returns the dico to use based on the user unit type selected
-                returns the roun_at variable value.
                 Use the following variables in the code for eas of use.
-                data_dico, round_at = dico_in_use()
+                selected_data_dico = dico_in_use()
             '''
             if self.selected_unit.get().lower() == 'imperial':
                 return self.imperial_data_dico, imperial_rounding
@@ -363,6 +362,18 @@ class MainInt:
                 return self.metric_data_dico, metric_rounding
             pass             
 
+        def round_factor_in_use (self,imperial_rounding, metric_rounding):
+            '''
+                returns the roun_at variable value.
+                Use the following variables in the code for eas of use.
+                round_at = round_factor_in_use()
+            '''
+            if self.selected_unit.get().lower() == 'imperial':
+                return self.imperial_data_dico, imperial_rounding
+            elif self.selected_unit.get().lower() == 'metric':
+                return self.metric_data_dico, metric_rounding
+            pass  
+        
         def add_receptecals_to_data_dico (self, data_receptacle_list):
             '''
                 Uses a list of lists to add items to the data dictionaries.
@@ -409,18 +420,20 @@ class MainInt:
                             ['Nordic_Lam_ply_quantity',None,None],
                             ['selected_calc_method',None,None],
                             ['shear_method_a_used',None,None],
-                            ['CMr','lbft','Nm'],
-                            ['EvalM',None,None],
+                            ['reduced_bending_resistance','lbft','Nm'],
+                            ['bending_analysis_ratio',None,None],
                             ['shear_equation_reference',None,None],
-                            ['CShearRes','lb','N'],
-                            ['EvalV',None,None],
+                            ['shear_reduced_resistance','lb','N'],
+                            ['shear_analysis_ratio',None,None],
                             ['K_D',None,None],
                             ['K_H',None,None],
                             ['tension_strain_perpendicular','psi','MPa'],
                             ['tension_strain_perpendicular_resistance','psi','MPa'],
-                            ['Evaltp',None,None],
+                            ['perpendicular_tension_strain_analysis_ratio',None,None],
                             ['tension_force_perpendicular','lb','N'],
-                            ['Fv','psi','MPa']
+                            ['Fv','psi','MPa'],
+                            ['shear_force','lb','N'],
+                            ['shear_resistance','lb','N'],
                             ]
 
             self.add_receptecals_to_data_dico(first_data_key_list)
@@ -504,23 +517,40 @@ class MainInt:
             elif selected_calc_method == self.calc_methods[1]:
                 bending_evaluation_function = fu.B700_Eval
                 shear_evaluation_function = fu.S700_Eval
+            
+            try:
+                self.metric_data_dico['shear_resistance_Vf']['value'] = (
+                         fu.S_Eval(
+                            self.metric_data_dico['Nordic_Lam_type']['value'],
+                            self.metric_data_dico['Nordic_Lam_depth']['value'],
+                            self.metric_data_dico['Nordic_Lam_thickness']['value'],
+                            0,
+                            self.metric_data_dico['shear_force_Vf']['value'],
+                            self.metric_data_dico['K_D']['value'],
+                            self.metric_data_dico['K_H']['value'],
+                            self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
+                            self.metric_data_dico['shear_force_Wf']['value'],
+                            self.metric_data_dico['shear_resistance_Wr']['value'],
+                            0)) # No hole and methode b to calculate Vr without reduction.
+            except:
+                self.metric_data_dico['shear_resistance_Vf']['value'] = None
                 
             try:    
-                (self.metric_data_dico['EvalM']['value'],
-                 self.metric_data_dico['CMr']['value']) = (
+                (self.metric_data_dico['bending_analysis_ratio']['value'],
+                 self.metric_data_dico['reduced_bending_resistance']['value']) = (
                          bending_evaluation_function(
                             self.metric_data_dico['bending_force_Mf']['value'],
                             self.metric_data_dico['bending_resistance_Mr']['value'],
                             self.metric_data_dico['hole_diameter']['value'],
                             self.metric_data_dico['Nordic_Lam_depth']['value']))
             except:
-                (self.metric_data_dico['EvalM']['value'],
-                 self.metric_data_dico['CMr']['value']) = (None,)*2
+                (self.metric_data_dico['bending_analysis_ratio']['value'],
+                 self.metric_data_dico['reduced_bending_resistance']['value']) = (None,)*2
                 print('bending calculations failed to load due to invalid inputs')
 
             try:
-                (self.metric_data_dico['EvalV']['value'],
-                 self.metric_data_dico['CShearRes']['value'],
+                (self.metric_data_dico['shear_analysis_ratio']['value'],
+                 self.metric_data_dico['shear_reduced_resistance']['value'],
                  self.metric_data_dico['Fv']['value']) = (
                          shear_evaluation_function(
                             self.metric_data_dico['Nordic_Lam_type']['value'],
@@ -535,13 +565,13 @@ class MainInt:
                             self.metric_data_dico['shear_resistance_Wr']['value'],
                             self.metric_data_dico['shear_method_a_used']['value']))
             except:
-                (self.metric_data_dico['EvalV']['value'],
-                 self.metric_data_dico['CShearRes']['value'],
+                (self.metric_data_dico['shear_analysis_ratio']['value'],
+                 self.metric_data_dico['shear_reduced_resistance']['value'],
                  self.metric_data_dico['Fv']['value']) = (None,)*3
                 print('shear calculations failed to load due to invalid inputs')
 
             try:
-                (self.metric_data_dico['Evaltp']['value'], 
+                (self.metric_data_dico['perpendicular_tension_strain_analysis_ratio']['value'], 
                  self.metric_data_dico['tension_strain_perpendicular']['value'], 
                  self.metric_data_dico['tension_strain_perpendicular_resistance']['value'], 
                  self.metric_data_dico['tension_force_perpendicular']['value'] ) = (
@@ -554,7 +584,7 @@ class MainInt:
                             convert(self.metric_data_dico['bending_force_Mf']['value'],"Nm","Nmm"),
                             self.metric_data_dico['Nordic_Lam_ply_quantity']['value']))
             except:
-                (self.metric_data_dico['Evaltp']['value'], 
+                (self.metric_data_dico['perpendicular_tension_strain_analysis_ratio']['value'], 
                  self.metric_data_dico['tension_strain_perpendicular']['value'], 
                  self.metric_data_dico['tension_strain_perpendicular_resistance']['value'], 
                  self.metric_data_dico['tension_force_perpendicular']['value'] ) = (None,)*4
@@ -579,7 +609,8 @@ class MainInt:
 #                                self.metric_data_dico[selected_key]['unit'],
 #                                self.imperial_data_dico[selected_key]['unit']))
 
-            data_dico, tension_strain_perpendicular_round_factor = self.dico_in_use(0,3)
+            data_dico = self.dico_in_use()
+            tension_strain_perpendicular_round_factor = self.round_factor_in_use(0,3)
 #            if selected_unit == 'imperial':
 #                data_dico = self.imperial_data_dico
 #                tension_strain_perpendicular_round_factor = 0
@@ -591,8 +622,8 @@ class MainInt:
             self.ShearMaxLength.set(str(round(data_dico['Nordic_Lam_depth']['value'],0)))
 
             print('Residual Mr = ',
-                  data_dico['CMr']['value'],'; Residual shear resistance = ',
-                  data_dico['CShearRes']['value'],'; tp Force = ',
+                  data_dico['reduced_bending_resistance']['value'],'; Residual shear resistance = ',
+                  data_dico['shear_reduced_resistance']['value'],'; tp Force = ',
                   data_dico['tension_strain_perpendicular']['value'], ' MPa ; tp Resistance = ',
                   data_dico['tension_strain_perpendicular_resistance']['value'],' MPa')
 
@@ -600,11 +631,11 @@ class MainInt:
             self.Out401bending_force_Mf.set (
                     f'{try_round_NA(data_dico["bending_force_Mf"]["value"],round_at=0)}'\
                     f' {data_dico["bending_force_Mf"]["unit"]}')
-            self.Out501CMr.set (
-                    f'{try_round_NA(data_dico["CMr"]["value"],round_at=0)}'\
-                    f' {data_dico["CMr"]["unit"]}')
+            self.Out501_reduced_bending_resistance.set (
+                    f'{try_round_NA(data_dico["reduced_bending_resistance"]["value"],round_at=0)}'\
+                    f' {data_dico["reduced_bending_resistance"]["unit"]}')
             self.Out601B.set (
-                    f'{try_round_NA(data_dico["EvalM"]["value"],round_at=2)}')
+                    f'{try_round_NA(data_dico["bending_analysis_ratio"]["value"],round_at=2)}')
 
             #Shear output display on interface
             if data_dico['shear_method_a_used']['value'] == 1:
@@ -619,10 +650,10 @@ class MainInt:
                 data_dico['shear_equation_reference']['value'] = '7.5.7.2 (b)'
 
             self.Out502CVr.set (
-                        f'{try_round_NA(data_dico["CShearRes"]["value"],round_at=0)}'\
-                        f' {data_dico["CShearRes"]["unit"]}')
+                        f'{try_round_NA(data_dico["shear_reduced_resistance"]["value"],round_at=0)}'\
+                        f' {data_dico["shear_reduced_resistance"]["unit"]}')
             self.Out602V.set (
-                        f'{try_round_NA(data_dico["EvalV"]["value"],round_at=2)}')
+                        f'{try_round_NA(data_dico["shear_analysis_ratio"]["value"],round_at=2)}')
 
             #Tension perpendicular to grain output display on interface
             self.Out403_tension_strain_perpendicular.set (
@@ -632,7 +663,7 @@ class MainInt:
                         f'{try_round_NA(data_dico["tension_strain_perpendicular_resistance"]["value"],round_at=tension_strain_perpendicular_round_factor)}'\
                         f' {data_dico["tension_strain_perpendicular_resistance"]["unit"]}')
             self.Out603TP.set (
-                        f'{try_round_NA(data_dico["Evaltp"]["value"],round_at=2)}')
+                        f'{try_round_NA(data_dico["perpendicular_tension_strain_analysis_ratio"]["value"],round_at=2)}')
             return data_dico
 
 ###################
@@ -970,7 +1001,8 @@ class MainInt:
 #                                self.metric_data_dico[selected_key]['unit'],
 #                                self.imperial_data_dico[selected_key]['unit']))            
             
-            data_dico, round_at = self.dico_in_use(2,1)
+            data_dico  = self.dico_in_use()
+            round_at = self.round_factor_in_use(2,1)
 #            if self.selected_unit.get().lower() == 'imperial':
 #                data_dico = self.imperial_data_dico
 #                round_at = 2
@@ -1036,8 +1068,10 @@ class MainInt:
 
 #Generate an analysis and a report based on the inputed data.        
         def ReportInt(self):
-            Input = self.InputProcess()
-            Re.Report(Input)
+            self.InputProcess()
+            selected_data_dico =  self.dico_in_use()
+            
+            Re.Report(selected_data_dico)
 
 #Convert input between imperial and international systems.
         def Radio(self):
