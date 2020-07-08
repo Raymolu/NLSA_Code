@@ -321,7 +321,7 @@ class MainInt:
             Ro+=2            
             self.Button1 = Button(master, text='Analyze', command=self.InputProcess, width = Width).grid(row=Ro, column=Col)
             Ro+=1
-            self.Button2 = Button(master, text='Analyze & Report', command=self.ReportInt, width = Width).grid(row=Ro, column=Col)
+            self.Button2 = Button(master, text='Analyze & Report', command=self.general_report, width = Width).grid(row=Ro, column=Col)
             Ro+=2
             self.Button3 = Button(master, text='Reference & Info', command=self.OpenFile, width = Width).grid(row=Ro, column=Col)
             Ro+=3
@@ -357,9 +357,9 @@ class MainInt:
                 selected_data_dico = dico_in_use()
             '''
             if self.selected_unit.get().lower() == 'imperial':
-                return self.imperial_data_dico, imperial_rounding
+                return self.imperial_data_dico
             elif self.selected_unit.get().lower() == 'metric':
-                return self.metric_data_dico, metric_rounding
+                return self.metric_data_dico
             pass             
 
         def round_factor_in_use (self,imperial_rounding, metric_rounding):
@@ -434,6 +434,7 @@ class MainInt:
                             ['Fv','psi','MPa'],
                             ['shear_force','lb','N'],
                             ['shear_resistance','lb','N'],
+                            ['shear_resistance_Vf','lb','N']
                             ]
 
             self.add_receptecals_to_data_dico(first_data_key_list)
@@ -442,10 +443,9 @@ class MainInt:
                 selected_dictionary['project_name']['value'] = self.input_project_name.get()
                 selected_dictionary['Notes']['value'] = self.Input_project_notes.get(0.0,"end-1c")
                 selected_dictionary['Nordic_Lam_type']['value'] = self.input_Nordic_Lam_type_1.get()
-#                selected_dictionary['Nordic_Lam_ply_quantity']['value'] = numerical_input_dico['Nordic_Lam_ply_quantity']
                 selected_dictionary['selected_calc_method']['value'] = self.selected_calc_method.get()
                 selected_dictionary['shear_method_a_used']['value'] = int(self.shear_method_a_used.get()) 
-            
+
             for selected_key in self.UnitDict:
                 self.imperial_data_dico[selected_key] = {'unit':self.UnitDict[selected_key][0],'value':None}
                 self.metric_data_dico[selected_key] =  {'unit':self.UnitDict[selected_key][1],'value':None}
@@ -458,30 +458,17 @@ class MainInt:
                     if (i == 'shear_force_Vf' and 
                         self.metric_data_dico['shear_method_a_used']['value'] == 1):
                         continue
-#                        try:
-#                            float(numerical_input_dico['shear_force_Wf'])
-#                            float(numerical_input_dico['shear_resistance_Wr'])
-#                            continue
-#                        except:    
-#                            pass                        
                     if ((i == 'shear_force_Wf' or i == 'shear_resistance_Wr') and
                         self.metric_data_dico['shear_method_a_used']['value'] == 0):
                         continue
-#                        try:
-#                            float(numerical_input_dico['shear_force_Vf'])
-#                            continue
-#                        except:
-#                            if self.metric_data_dico['shear_method_a_used']['value'] == 1:
-#                                pass
-#                            continue
-#
+
                     error_value = numerical_input_dico[i]
                     numerical_input_dico[i] = None
                     messagebox.showinfo(f'Error Message','Please correct the'\
                     f' input value for the {i} [ {error_value} ] to a number. (float or integer)')
                     print("[",i,"] is not a valid input")
             # End validation of data #
-
+            
             # Sets the ply to the lowest int number
             if numerical_input_dico['Nordic_Lam_ply_quantity'] != None:
                 numerical_input_dico['Nordic_Lam_ply_quantity'] = (
@@ -507,6 +494,7 @@ class MainInt:
                         self.imperial_data_dico[selected_key]['value'] = converted_key_value
                     except:
                         pass   
+
             print(f'Final ply quantity: {self.metric_data_dico["Nordic_Lam_ply_quantity"]["value"]}')
 
             #Generate all the results from the analysis functions based on the method selected.
@@ -520,18 +508,14 @@ class MainInt:
             
             try:
                 self.metric_data_dico['shear_resistance_Vf']['value'] = (
-                         fu.S_Eval(
+                         fu.shear_resistance_equation_b(
                             self.metric_data_dico['Nordic_Lam_type']['value'],
                             self.metric_data_dico['Nordic_Lam_depth']['value'],
                             self.metric_data_dico['Nordic_Lam_thickness']['value'],
-                            0,
-                            self.metric_data_dico['shear_force_Vf']['value'],
                             self.metric_data_dico['K_D']['value'],
                             self.metric_data_dico['K_H']['value'],
                             self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
-                            self.metric_data_dico['shear_force_Wf']['value'],
-                            self.metric_data_dico['shear_resistance_Wr']['value'],
-                            0)) # No hole and methode b to calculate Vr without reduction.
+                            )) # No hole and methode b to calculate Vr without reduction.
             except:
                 self.metric_data_dico['shear_resistance_Vf']['value'] = None
                 
@@ -601,22 +585,9 @@ class MainInt:
 
             # Update the imperial data dictionary
             self.pass_data_from_metric_to_imperial_dico()
-            
-#            for selected_key in self.metric_data_dico:
-#                self.imperial_data_dico[selected_key]['value'] = (
-#                        convert(
-#                                self.metric_data_dico[selected_key]['value'],
-#                                self.metric_data_dico[selected_key]['unit'],
-#                                self.imperial_data_dico[selected_key]['unit']))
 
             data_dico = self.dico_in_use()
             tension_strain_perpendicular_round_factor = self.round_factor_in_use(0,3)
-#            if selected_unit == 'imperial':
-#                data_dico = self.imperial_data_dico
-#                tension_strain_perpendicular_round_factor = 0
-#            elif selected_unit == 'metric':
-#                data_dico = self.metric_data_dico
-#                tension_strain_perpendicular_round_factor = 3
 
             #Set the maximum length to be able to use shear equation 7.5.7.2 (b)
             self.ShearMaxLength.set(str(round(data_dico['Nordic_Lam_depth']['value'],0)))
@@ -897,23 +868,23 @@ class MainInt:
                         self.metric_data_dico['scres_absolute_tension_resistance_TStr']['value'] *
                         self.metric_data_dico['screw_tip']['value']) > 0:
                         
-                            (self.metric_data_dico['highest_screw_length']['value'],
-                             self.metric_data_dico['calculated_screw_thread']['value'],
-                             self.metric_data_dico['tension_force_perpendicular_offset_increase']['value']) = (
-                                Rfu.ScrewRepair(
-                                self.metric_data_dico['tension_force_perpendicular']['value'],
-                                self.metric_data_dico['screw_quantity']['value'],
-                                self.metric_data_dico['screw_pull_out_resistance']['value'],
-                                self.metric_data_dico['scres_absolute_tension_resistance_TStr']['value'],
-                                self.metric_data_dico['screw_tip']['value'],
-                                self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
-                                self.metric_data_dico['Nordic_Lam_thickness']['value'],
-                                self.metric_data_dico['Nordic_Lam_depth']['value'],
-                                self.metric_data_dico['hole_diameter']['value'],
-                                self.metric_data_dico['screw_configuration']['value'],
-                                self.metric_data_dico['screw_offset']['value']
-                                ))
-                        
+                        (self.metric_data_dico['highest_screw_length']['value'],
+                         self.metric_data_dico['calculated_screw_thread']['value'],
+                         self.metric_data_dico['tension_force_perpendicular_offset_increase']['value']) = (
+                            Rfu.ScrewRepair(
+                            self.metric_data_dico['tension_force_perpendicular']['value'],
+                            self.metric_data_dico['screw_quantity']['value'],
+                            self.metric_data_dico['screw_pull_out_resistance']['value'],
+                            self.metric_data_dico['scres_absolute_tension_resistance_TStr']['value'],
+                            self.metric_data_dico['screw_tip']['value'],
+                            self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
+                            self.metric_data_dico['Nordic_Lam_thickness']['value'],
+                            self.metric_data_dico['Nordic_Lam_depth']['value'],
+                            self.metric_data_dico['hole_diameter']['value'],
+                            self.metric_data_dico['screw_configuration']['value'],
+                            self.metric_data_dico['screw_offset']['value']
+                            ))
+
                         print(f"length: "\
                               f"{round(self.metric_data_dico['highest_screw_length']['value'],4)}"\
                               f"{self.metric_data_dico['highest_screw_length']['unit']}"\
@@ -1067,10 +1038,9 @@ class MainInt:
             self.Glued_PanelWindow.destroy()            
 
 #Generate an analysis and a report based on the inputed data.        
-        def ReportInt(self):
+        def general_report(self):
             self.InputProcess()
             selected_data_dico =  self.dico_in_use()
-            
             Re.Report(selected_data_dico)
 
 #Convert input between imperial and international systems.

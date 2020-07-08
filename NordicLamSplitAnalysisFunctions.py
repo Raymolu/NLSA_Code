@@ -58,6 +58,20 @@ def B_Eval(Mf,Mr,hd,h):
 
 #Evaluate the Beam residual shear resistance
 @try_catch
+def shear_resistance_equation_b(NLType,depth,thickness,K_D,K_H,ply):
+    '''
+        Nordic Lam shear resistance in Newton based on the shear Clauses 7.5.7.2(b)
+        This resistance is without a hole
+    '''
+    Phi = 0.9
+    fv = float(tbNL.GenDict()[NLType]['Fvx'])
+    Fv = fv * (K_D * K_H * 1 * 1)
+    Ag = thickness * depth
+    shear_resistance_Vf = Phi * Fv * 2 / 3 * Ag * ply
+
+    return shear_resistance_Vf
+
+@try_catch
 def S_Eval(NLType,h,b,hd,Vf,KD,KH,Ply,Wf,Wr,ShearA):    
     """
         Nordic-Lam Type based on CSA 086-14

@@ -8,7 +8,7 @@ V 6.04 (2019-04-04)
 def convert(Val1,Unit1,Unit2):
     if type(Val1) == type('string'):
         Val2 = Val1
-    if Val1 == None or Val1 == "" or  Val1 == 0:
+    if Val1 == None or Val1 == "":
         Val2 = None
     elif Unit1 == 'in' and Unit2 == 'mm':
         Val2 = Val1 * 25.4

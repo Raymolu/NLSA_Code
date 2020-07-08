@@ -20,14 +20,83 @@ SheetNRep = 'Report'
 # special Vf or Wf new var = 'shear_force', special Vr or Wr new var = 'shear_resistance', 
 ### ADD shear_resistance_Vf
 
+file_path = ''
+report_sheet_name = 'report'
+
 def Report(selected_data_dico):
+    '''
+        Organizes the data dico information in a formated excel sheet.
+    '''
+    
     if selected_data_dico['shear_method_a_used']['value'] == 1:
         selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Wf']['value']
         selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Wf']['value']
     elif selected_data_dico['shear_method_a_used']['value'] == 0:
         selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Vf']['value']
         selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Vf']['value']    
+
+    Nordic_Lam_split_analyser_general_report_template = (
+            pd.read_excel('templates\\NLSA_general_report.xlsx', sheet_name=0, header=0, index_col=0))    
+    lookup_list = Nordic_Lam_split_analyser_general_report_template.index
+
+    for selected_index in lookup_list:
+        try:
+            Nordic_Lam_split_analyser_general_report_template.at[selected_index,'value'] = str(
+                    selected_data_dico[selected_index]['value'])
+        except:
+            pass
+        try:
+            Nordic_Lam_split_analyser_general_report_template.at[selected_index,'unit'] = str(
+                    selected_data_dico[selected_index]['unit'])
+        except:
+            pass
+    Nordic_Lam_split_analyser_general_report_template = (
+            Nordic_Lam_split_analyser_general_report_template.replace(to_replace='None',value=''))
+
+    Nordic_Lam_split_analyser_general_report_template = (
+            Nordic_Lam_split_analyser_general_report_template [['label','value','unit','description']])
+
     
+
+    print(Nordic_Lam_split_analyser_general_report_template.columns)
+
+#    print (Nordic_Lam_split_analyser_general_report_template.loc[:,'value'])
+#    print (Nordic_Lam_split_analyser_general_report_template.loc[:,'unit'])
+    print (Nordic_Lam_split_analyser_general_report_template)
+    
+    # Build first set of data
+    df = Nordic_Lam_split_analyser_general_report_template
+
+    #Generate File name with a time stamp
+    Time=str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H_%M_%S'))
+#    FileName = df.at['ReportType','Label']+'_'+Time+'.xlsx'
+    FileName = file_path+df.at['report_type','label']+'_'+Time+'.xlsx'
+
+    writer = pd.ExcelWriter(FileName)
+
+    df.to_excel(writer, header=False, index=False, sheet_name=report_sheet_name)
+
+    #Add inforation
+    Notes = [('Project: ',selected_data_dico['project_name']['value']),
+             ('Notes',selected_data_dico['Notes']['value']),
+             ('Date: ', str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d'))),
+             ('Designer: ', os.getlogin())] 
+    df1 = pd.DataFrame(data=Notes)
+    df1.to_excel(writer, index=False, header=False, sheet_name=report_sheet_name, startrow = df.shape[0] + 1)
+
+# Add the references
+#    df3 = pd.DataFrame(data=References)
+#    df3.to_excel(writer, index=False, header=False, sheet_name=report_sheet_name, startcol = 1, startrow = df.shape[0] + df1.shape[0] + 2)
+
+    #Save all the inputed data
+    writer.save()
+
+
+
+
+
+
+
     ## Read template create new sheat with date and name etc...
     ## Replace each cell with the proper data based on lookup
     ## Add the information, project etc...
