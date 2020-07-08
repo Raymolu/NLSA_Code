@@ -10,7 +10,7 @@ import os
 import pandas as pd
 import NordicLamSplitAnalysisFunctions as fu
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Border, Side, Font
 from tkinter import messagebox
 
 SheetNRep = 'Report'
@@ -20,67 +20,82 @@ SheetNRep = 'Report'
 # special Vf or Wf new var = 'shear_force', special Vr or Wr new var = 'shear_resistance', 
 ### ADD shear_resistance_Vf
 
-file_path = ''
+report_file_path = 'reports\\'
 report_sheet_name = 'report'
 
-def Report(selected_data_dico):
+def round_report_data(value):
+    '''
+        Converts numerical data with the appropriate precision.
+        Let non numerical data pass by unchanged.
+        converts the result to string.
+    '''
+    if type(value) == type(int()):
+        value_out = value
+    else:
+        try:
+            float_value = float(value)
+            value_out = round(float_value, 2)
+            if len(str(value_out)) <= 4:
+                value_out = round(float_value, 4)
+            elif len(str(value_out)) >= 6:
+                value_out = int(round(float_value, 0))
+        except:
+            value_out = value
+    value_out = str(value_out)
+    return value_out
+
+def Report(selected_data_dico, template_file_path):
     '''
         Organizes the data dico information in a formated excel sheet.
     '''
-    
     if selected_data_dico['shear_method_a_used']['value'] == 1:
         selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Wf']['value']
         selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Wf']['value']
+        selected_data_dico['shear_method_a_used_txt']['value'] = '(a) Wr'
     elif selected_data_dico['shear_method_a_used']['value'] == 0:
         selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Vf']['value']
         selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Vf']['value']    
+        selected_data_dico['shear_method_a_used_txt']['value'] = '(b) Vr'
 
-    Nordic_Lam_split_analyser_general_report_template = (
-            pd.read_excel('templates\\NLSA_general_report.xlsx', sheet_name=0, header=0, index_col=0))    
-    lookup_list = Nordic_Lam_split_analyser_general_report_template.index
+    Nordic_Lam_split_analyser_report_template = (
+            pd.read_excel(template_file_path, sheet_name=0, header=0, index_col=0))    
+    lookup_list = Nordic_Lam_split_analyser_report_template.index
 
     for selected_index in lookup_list:
         try:
-            Nordic_Lam_split_analyser_general_report_template.at[selected_index,'value'] = str(
+            Nordic_Lam_split_analyser_report_template.at[selected_index,'value'] = round_report_data(
                     selected_data_dico[selected_index]['value'])
         except:
             pass
         try:
-            Nordic_Lam_split_analyser_general_report_template.at[selected_index,'unit'] = str(
+            Nordic_Lam_split_analyser_report_template.at[selected_index,'unit'] = str(
                     selected_data_dico[selected_index]['unit'])
         except:
             pass
-    Nordic_Lam_split_analyser_general_report_template = (
-            Nordic_Lam_split_analyser_general_report_template.replace(to_replace='None',value=''))
+    Nordic_Lam_split_analyser_report_template = (
+            Nordic_Lam_split_analyser_report_template.replace(to_replace='None',value=''))
 
-    Nordic_Lam_split_analyser_general_report_template = (
-            Nordic_Lam_split_analyser_general_report_template [['label','value','unit','description']])
-
-    
-
-    print(Nordic_Lam_split_analyser_general_report_template.columns)
-
-#    print (Nordic_Lam_split_analyser_general_report_template.loc[:,'value'])
-#    print (Nordic_Lam_split_analyser_general_report_template.loc[:,'unit'])
-    print (Nordic_Lam_split_analyser_general_report_template)
+    Nordic_Lam_split_analyser_report_template = (
+            Nordic_Lam_split_analyser_report_template [['label','value','unit','description']])
     
     # Build first set of data
-    df = Nordic_Lam_split_analyser_general_report_template
+    df = Nordic_Lam_split_analyser_report_template
 
     #Generate File name with a time stamp
-    Time=str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H_%M_%S'))
-#    FileName = df.at['ReportType','Label']+'_'+Time+'.xlsx'
-    FileName = file_path+df.at['report_type','label']+'_'+Time+'.xlsx'
-
-    writer = pd.ExcelWriter(FileName)
-
+    time_stamp = str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H_%M_%S'))
+    file_name = report_file_path + df.at['report_type','label'] + '_' + time_stamp + '.xlsx'
+    writer = pd.ExcelWriter(file_name)
     df.to_excel(writer, header=False, index=False, sheet_name=report_sheet_name)
 
     #Add inforation
+    if os.getlogin() == 'ludovicraymond':
+        designer = 'Ludovic Raymond'
+    else:
+        designer = os.getlogin()
     Notes = [('Project: ',selected_data_dico['project_name']['value']),
-             ('Notes',selected_data_dico['Notes']['value']),
+             ('Notes: ',selected_data_dico['Notes']['value']),
              ('Date: ', str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d'))),
-             ('Designer: ', os.getlogin())] 
+             ('Designer: ', designer)] 
     df1 = pd.DataFrame(data=Notes)
     df1.to_excel(writer, index=False, header=False, sheet_name=report_sheet_name, startrow = df.shape[0] + 1)
 
@@ -91,167 +106,118 @@ def Report(selected_data_dico):
     #Save all the inputed data
     writer.save()
 
-
-
-
-
-
-
-    ## Read template create new sheat with date and name etc...
-    ## Replace each cell with the proper data based on lookup
-    ## Add the information, project etc...
-    ## Add the format
-    
-    
-    
-    return
-
-
-
-def old_Report(Input):
-    #Generates the data to be displayed in the excel spread sheet
-    #Remove Notes from function input to use it elsewere as the variable Note
-    ValList = []
-    for i in Input:
-        ValList += [i]
-    #Adds the project name, the date and login to identify the project and user.
-    Note = [(ValList[1]),(str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d'))),(os.getlogin())]
-    Project = ValList[0]
-
-    #Remove project Name and notes
-    del ValList[0:2]
-    #Number of items passed from the main GUI to the reports minus Fv
-    MainGUIDataItems = 22
-    #Remove the Fv caracteristic thats redundant
-    del ValList[MainGUIDataItems]
-
-    ASSYGUIItems = MainGUIDataItems + 9 #Main GUI + ASSY GUI
-    PanelGUIItems = MainGUIDataItems + 4 #Main GUI + Panel GUI, To update with righ qty of parameters
-
-    #Main GUI Items Units and labels
-### Coding Note, When doing the imperial report, add the imperial units to the dictionary and update the dataframe builder to
-### example:         if radiobutton set to Imperial then: MGuiUni += [MGuiLabUniDic[i][1]] else [MGuiLabUniDic[i][0]]
-
-
-    #Set all the report Main interface parameter and output labels and units.
-    MGuiLabUniDic = {'Nordic Lam Type':'Type',  'Ply':'nbr',                    'b, Width':'mm',                'h, Depth':'mm',
-                     'hd, Hole diameter':'mm',  'Method':'',                    'Mf, Moment force':'Nm',        'Mr, Moment resistance':'Nm',
-                     'Mrr, Reduced':'Nm',       'Mf/Mrr':'Bending',             'Shear equation used':'',       'Vf, Shear force (b)':'N',
-                     'Wf, Shear force (a)':'N', 'Wr, Shear resistance (a)':'N', 'Residual Shear Res.':'N',      'Force/Resistance':'Shear',
-                     'KD, Load duration':'',    'KH, system factor':'',         'Ftp: Perp. tension':'MPa',     'Ftpr, tension resistance':'MPa',
-                     'Ftp/Ftpr':'P.Tension',  'Tp, Tension force':'N'}
-    #Set the screw repair outpul labels and units
-    SGuiLabUniDic = {'Method':'',           'Orientation':'',   'Screw Type':'',            'Screw Qty':'',
-                     'Screw Length':'mm',   'Min Thread':'mm',  'Screw Resistance':'N/mm',  'Screw Offset':'mm',
-                     'Tp Used':'N'}
-
-    PGuiLabUniDic = {'Method':'',           'Panel height':'mm', 'Panel width':'mm',        '0.131" x 3.25" Nails.':'Qty'}
-
-#    Generate the lists to build the dataframe
-    MGuiUni = []
-    for i in MGuiLabUniDic:
-        MGuiUni += [MGuiLabUniDic[i]]
-    MGuiLabel= []    
-    for i in MGuiLabUniDic:
-        MGuiLabel += [i]
-    SGuiUni = []
-    for i in SGuiLabUniDic:
-        SGuiUni += [SGuiLabUniDic[i]]
-    SGuiLabel= []    
-    for i in SGuiLabUniDic:
-        SGuiLabel += [i]  
-    PGuiUni = []
-    for i in PGuiLabUniDic:
-        PGuiUni += [PGuiLabUniDic[i]]
-    PGuiLabel= []    
-    for i in PGuiLabUniDic:
-        PGuiLabel += [i]      
-    
-    if len(ValList) > MainGUIDataItems:
-        try:
-            if ValList[MainGUIDataItems] == 'ASSY Screw' and len(ValList) == ASSYGUIItems:
-                print('test in report function step 2')
-                RepList = [ValList,MGuiUni+SGuiUni]
-                df = pd.DataFrame(data=RepList)
-                df.columns=MGuiLabel+SGuiLabel
-                df = df.transpose()
-                df.columns=['Value','Units']
-            elif ValList[MainGUIDataItems] == 'Glued Panel' and len(ValList) == PanelGUIItems:
-                RepList = [ValList,MGuiUni+PGuiUni]
-                df = pd.DataFrame(data=RepList)
-                df.columns=MGuiLabel+PGuiLabel
-                df = df.transpose()
-                df.columns=['Value','Units']
-        except:
-            print('Problem in retrieving the repair type variable or invalid output items')
-    elif len(ValList) == MainGUIDataItems:
-        RepList = [ValList,MGuiUni]
-        df = pd.DataFrame(data=RepList)
-        df.columns=MGuiLabel
-        df = df.transpose()
-        df.columns=['Value','Units']
-    else:
-        print('Invalid quantity of parameters for report.\nInput all values in app.')
-        messagebox.showinfo('Missing Data','Fill up all data on the user interface')
-        df = pd.DataFrame(data=[])
-    
-    #Generate File name with a time stamp
-    Time=str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H_%M_%S'))
-    FileName = 'NLSA_OUT_'+Time+'.xlsx'
-
-    writer = pd.ExcelWriter(FileName)
-
-    df.to_excel(writer, sheet_name=SheetNRep)
-
-    #Add inforation
-    df1 = pd.DataFrame(data=Note)
-    df1.columns=[Project]
-    df1.index=['Notes','Date','Designer']
-    df1.to_excel(writer, sheet_name=SheetNRep, startrow = len(ValList)+2)
-
-    #Add the spec used for this project
-    df2 = fu.NLSpecs().transpose()
-    df2.to_excel(writer, sheet_name=SheetNRep, startcol = 5)
-
-    #Save all the inputed data
-    writer.save()
-    
 #   Create a workbook object.
-    wb = Workbook()
-    wb = load_workbook(FileName)
-    
+    report_workbook = Workbook()
+    report_workbook = load_workbook(file_name)
+
 #   Open up the last edited workbook sheet.    
-    sheet=wb.active
+    sheet=report_workbook.active
 
-#   Definition of the cells to align and merge. (Nice to have, search and find the cell ID based on value)
-    ProjectCell = 'B'+str(len(ValList)+3)
-    NoteCell = 'B'+str(len(ValList)+4)
+    # Set column width
+    sheet.column_dimensions['A'].width = 40
+    sheet.column_dimensions['B'].width = 20
+    sheet.column_dimensions['C'].width = 5
+    sheet.column_dimensions['D'].width = 60
 
-    PCells = sheet[ProjectCell]
-    NCells = sheet[NoteCell]
-    PMerge = ProjectCell + ':I' + str(PCells.row)
-    NMerge = NoteCell + ':I' + str(NCells.row)
-    
-#   Set the alignement parameter    
-    Al = Alignment(horizontal='left',
-                   vertical='top',
-                   wrap_text=True)
-#   Apply the alignement to the first cell of the Note range
-    PCells.alignment = Al
-    NCells.alignment = Al
-
-#   Make the cell height acceptable to accomodate multiple lines
-    sheet.row_dimensions[NCells.row].height =250
-#   Merge Note cells to allow fot them to be all displayed
-    sheet.merge_cells(PMerge)
-    sheet.merge_cells(NMerge)
-
-    sheet.column_dimensions['A'].width = 26
-    sheet.column_dimensions['B'].width = 12
-    sheet.column_dimensions['C'].width = 10
-    
     sheet.sheet_properties.pageSetUpPr.fitToPage = True
 
-    sheet.oddHeader.left.text = 'Project: ' + str(Project)
+    sheet.oddHeader.left.text = f"Project: {selected_data_dico['project_name']['value']}"
 
-    wb.save(FileName)
+    font_header_0 = Font(name='Calibri',
+                  size=12,
+                  bold=True,
+                  italic=False,
+                  vertAlign=None,
+                  underline='none',
+                  strike=False,
+                  color='FF000000')
+    
+    heading_list = ('Nordic Lam specifications:', 'Analysis:',
+                    'Splitting Analysis:', 'Reinforcement Analysis:')
+    
+    counter = 0
+    while counter < df.shape[0]:
+        for selected_heading in heading_list:
+            if df.iloc[counter,0] == selected_heading:
+                cell_name = 'A' + str(counter+1)
+                cell_target = sheet[cell_name]
+                cell_target.font = font_header_0
+                sheet.row_dimensions[cell_target.row].height = 16
+        counter += 1    
+        
+    font_header_1 = Font(name='Calibri',
+                  size=24,
+                  bold=True,
+                  italic=False,
+                  vertAlign=None,
+                  underline='none',
+                  strike=False,
+                  color='FF000000')
+
+    cell_report_title = sheet['A1']
+    cell_report_title.font = font_header_1
+    sheet.row_dimensions[cell_report_title.row].height = 36        
+
+    align_top_left_wrap = Alignment(horizontal='left',
+               vertical='top',
+               wrap_text=True)
+
+    align_top_right_wrap = Alignment(horizontal='right',
+                   vertical='top',
+                   wrap_text=True)
+
+    merge_row_list = [df.shape[0] + 2, df.shape[0] + 3, df.shape[0] + 4, df.shape[0] + 5]
+    deep_row_list = [df.shape[0] + 3,]
+
+    for row_index in merge_row_list:
+        target_cell_name = 'B' + str(row_index)
+        if target_cell_name == 'B1':
+            target_cell_name = 'A1'
+        target_cell = sheet[target_cell_name]
+        target_cells_merge = target_cell_name + ':D' + str(target_cell.row)
+        target_cell.alignment = align_top_left_wrap 
+
+
+        for selected_row in deep_row_list:
+            cell_to_deepen = 'B' + str(selected_row)
+            if target_cell_name == cell_to_deepen:
+                sheet.row_dimensions[target_cell.row].height =104    
+
+        sheet.merge_cells(target_cells_merge)
+
+    selected_row = 4
+    while selected_row <= df.shape[0]:
+        selected_cell_name = 'A' + str(selected_row)
+        selected_cell = sheet[selected_cell_name]
+        selected_cell.alignment = align_top_right_wrap
+        selected_row += 1
+
+    selected_row = df.shape[0]+1
+    while selected_row <= df.shape[0] + df1.shape[0]:
+        selected_cell_name = 'A' + str(selected_row)
+        selected_cell = sheet[selected_cell_name]
+        selected_cell.alignment = align_top_left_wrap
+        selected_row += 1
+        
+    counter = 0
+    while counter < df.shape[0]:
+        for selected_heading in heading_list:
+            if df.iloc[counter,0] == selected_heading:
+                cell_name = 'A' + str(counter+1)
+                cell_target = sheet[cell_name]
+                cell_target.alignment = align_top_left_wrap
+                sheet.row_dimensions[cell_target.row].height = 16
+        counter += 1    
+
+    selected_row = 4
+    while selected_row <= df.shape[0]:
+        selected_cell_name = 'B' + str(selected_row)
+        selected_cell = sheet[selected_cell_name]
+        selected_cell.alignment = align_top_right_wrap
+        selected_row += 1
+    
+    report_workbook.save(file_name) 
+    
+    pass
+
+

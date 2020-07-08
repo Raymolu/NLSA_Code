@@ -369,9 +369,9 @@ class MainInt:
                 round_at = round_factor_in_use()
             '''
             if self.selected_unit.get().lower() == 'imperial':
-                return self.imperial_data_dico, imperial_rounding
+                return imperial_rounding
             elif self.selected_unit.get().lower() == 'metric':
-                return self.metric_data_dico, metric_rounding
+                return metric_rounding
             pass  
         
         def add_receptecals_to_data_dico (self, data_receptacle_list):
@@ -420,6 +420,7 @@ class MainInt:
                             ['Nordic_Lam_ply_quantity',None,None],
                             ['selected_calc_method',None,None],
                             ['shear_method_a_used',None,None],
+                            ['shear_method_a_used_txt',None,None],
                             ['reduced_bending_resistance','lbft','Nm'],
                             ['bending_analysis_ratio',None,None],
                             ['shear_equation_reference',None,None],
@@ -471,7 +472,7 @@ class MainInt:
             
             # Sets the ply to the lowest int number
             if numerical_input_dico['Nordic_Lam_ply_quantity'] != None:
-                numerical_input_dico['Nordic_Lam_ply_quantity'] = (
+                numerical_input_dico['Nordic_Lam_ply_quantity'] = int(
                     math.floor(numerical_input_dico['Nordic_Lam_ply_quantity']))
                 
             # Set all the numerical inputs in the dico after being validated
@@ -649,16 +650,16 @@ class MainInt:
                                         ]
 
             self.add_receptecals_to_data_dico(reinforcement_data_key_list) 
-            self.metric_data_dico['screw_oreinforcement_type']['value'] = (
+            self.metric_data_dico['reinforcement_type']['value'] = (
                     self.reinforcement_type.get())
             self.pass_data_from_metric_to_imperial_dico()
             
             
             
-            if self.metric_data_dico['screw_oreinforcement_type']['value'] == (
+            if self.metric_data_dico['reinforcement_type']['value'] == (
                     self.reinforcement_types[0]):
                 self.ASSY_ScrewGUI()
-            elif  self.metric_data_dico['screw_oreinforcement_type']['value'] == (
+            elif  self.metric_data_dico['reinforcement_type']['value'] == (
                     self.reinforcement_types[1]):
                 try:
                     self.Glued_PanelWindow.destroy()            
@@ -705,9 +706,9 @@ class MainInt:
             self.ScrewInput2.current(None)
             self.ScrewInput2.bind("<<ComboboxSelected>>",self.screw_user_selection)
             Ro+=1
-            self.screw_offset_input_3 = Entry(self.ASSY_ScrewWindow, font = "Arial 8 bold", width = Width)
-            self.screw_offset_input_3.grid(row=Ro, column=Col, sticky=Anchor)
-            self.screw_offset_input_3.insert(0,0)
+            self.hole_vertical_offset_input_3 = Entry(self.ASSY_ScrewWindow, font = "Arial 8 bold", width = Width)
+            self.hole_vertical_offset_input_3.grid(row=Ro, column=Col, sticky=Anchor)
+            self.hole_vertical_offset_input_3.insert(0,0)
 
         #Column 0 Radio Buttons
             Ro+=2
@@ -785,7 +786,7 @@ class MainInt:
             '''
             screw_data_key_list = [
                                 ['screw_type',None,None],
-                                ['screw_offset','in','mm'],
+                                ['hole_vertical_offset','in','mm'],
                                 ['screw_pull_out_resistance','lb/in','N/mm'],
                                 ['scres_absolute_tension_resistance_TStr','lb','N'],
                                 ['screw_tip','in','mm']
@@ -803,14 +804,14 @@ class MainInt:
                     print( f"failed to lookup [ {item_to_lookup} ] for {self.ScrewInput2.get()} screw." )
                 return data
             
-            get_list = [self.ScrewInput2.get(), self.screw_offset_input_3.get(),
+            get_list = [self.ScrewInput2.get(), self.hole_vertical_offset_input_3.get(),
                         try_table_lookup (G), try_table_lookup ('TStr'),
                         try_table_lookup ('dia')]
             
             counter = 0
             for selected_key in screw_data_key_list:
                 try:
-                    if selected_key[0] == 'screw_offset' :
+                    if selected_key[0] == 'hole_vertical_offset' :
                         self.metric_data_dico[selected_key[0]]['value'] = abs(float(get_list[counter]))
                     else:
                         self.metric_data_dico[selected_key[0]]['value'] = float(get_list[counter])
@@ -843,7 +844,7 @@ class MainInt:
             
             screw_repair_data_key_list = [
                                         ['screw_quantity',None,None],
-                                        ['screw_configuration',None,None]
+                                        ['screw_configuration',None,None],
                                         ['highest_screw_length','in','mm'],
                                         ['calculated_screw_thread','in','mm'],
                                         ['tension_force_perpendicular_offset_increase','lb','N'],
@@ -851,10 +852,10 @@ class MainInt:
 
             self.add_receptecals_to_data_dico(screw_repair_data_key_list)
 
-            if self.metric_data_dico['screw_offset']['value'] > (
+            if self.metric_data_dico['hole_vertical_offset']['value'] > (
                     self.metric_data_dico['Nordic_Lam_depth']['value'] * 0.1):
                 messagebox.showinfo("Error Message",
-                    f"Please correct the offset value: {self.metric_data_dico['screw_offset']['value']}mm"\
+                    f"Please correct the offset value: {self.metric_data_dico['hole_vertical_offset']['value']}mm"\
                     f" to a value within {str(round(self.metric_data_dico['Nordic_Lam_depth']['value'] * 0.1,2))}mm")
                 return 
             else:
@@ -882,7 +883,7 @@ class MainInt:
                             self.metric_data_dico['Nordic_Lam_depth']['value'],
                             self.metric_data_dico['hole_diameter']['value'],
                             self.metric_data_dico['screw_configuration']['value'],
-                            self.metric_data_dico['screw_offset']['value']
+                            self.metric_data_dico['hole_vertical_offset']['value']
                             ))
 
                         print(f"length: "\
@@ -913,16 +914,11 @@ class MainInt:
             return
         
         def ReportScrew(self):
-            try:
-                ScrewData = self.ASSY_ScrewCal()
-                highest_screw_length = ScrewData[4]
-                print(highest_screw_length)
-                Input = self.Input
-                Input += ScrewData
-            except:
-                print('invalid data')
-            Re.Report(Input)
-            if highest_screw_length !=0: self.ASSY_ScrewWindow.destroy()
+            self.InputProcess()
+            Re.Report(self.dico_in_use(), 'templates\\NLSA_screw_reinforcement_report.xlsx')
+            if self.metric_data_dico['highest_screw_length']['value'] !=0: self.ASSY_ScrewWindow.destroy()
+            pass
+
 
         ### Panel GUI and functions    
         def Glued_PanelGUI(self):  
@@ -1022,26 +1018,29 @@ class MainInt:
             self.PanelOut2Var.set(TextOut2Var)
             
         def ReportPanel(self):
-            try:
-                ReinforceMethod = self.Reinforce.get()
-                Input = self.InputProcess()
-                #### Update with report based on unit type
-                PanelData = (ReinforceMethod, 
-                             self.metric_data_dico['panel_height']['Value'],
-                             self.metric_data_dico['panel_width']['value'],
-                             self.metric_data_dico['panel_nail_quantity']['value'])
-                Input += PanelData
-            except:
-                print('invalid data')
-            
-            Re.Report(Input)
+            self.InputProcess()
+            Re.Report(self.dico_in_use(), 'templates\\NLSA_panel_reinforcement_report.xlsx')
             self.Glued_PanelWindow.destroy()            
+            pass
+#            try:
+#                ReinforceMethod = self.Reinforce.get()
+#                Input = self.InputProcess()
+#                #### Update with report based on unit type
+#                PanelData = (ReinforceMethod, 
+#                             self.metric_data_dico['panel_height']['Value'],
+#                             self.metric_data_dico['panel_width']['value'],
+#                             self.metric_data_dico['panel_nail_quantity']['value'])
+#                Input += PanelData
+#            except:
+#                print('invalid data')
+#            
+#            Re.Report(Input)
 
 #Generate an analysis and a report based on the inputed data.        
         def general_report(self):
             self.InputProcess()
-            selected_data_dico =  self.dico_in_use()
-            Re.Report(selected_data_dico)
+            Re.Report(self.dico_in_use(), 'templates\\NLSA_general_report.xlsx')
+#            Re.Report(selected_data_dico)
 
 #Convert input between imperial and international systems.
         def Radio(self):
