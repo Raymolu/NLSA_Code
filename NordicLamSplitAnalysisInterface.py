@@ -27,6 +27,10 @@ class MainInt:
             PowerUser = 'ludovicraymond'
             self.master = master
             self.In=str()
+            self.bg = '#c2b280' #Background Color for all GUI using the self variable
+            self.bg_clear = '#fffabb' #Background for entry widgets using the self variable
+            self.But_bg = '#007A4C' #Button Background Color using the self variable
+            master.configure(bg=self.bg)
             self.selected_unit = StringVar()
             self.selected_calc_method = StringVar()
             self.reinforcement_type = StringVar()
@@ -88,11 +92,13 @@ class MainInt:
             Height = 5
             Anchor = 'e'
             Ro+=1
-            self.label_project_name = Label(master, text="Project Name:", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_project_name = Label(master, text="Project Name:",
+                                            anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.label_project_notes = Label(master, text="Notes:", anchor = 'ne', width = Width, height = Height).grid(row=Ro, column=Col)  
+            self.label_project_notes = Label(master, text="Notes:",
+                                             anchor = 'ne', width = Width,
+                                             height = Height, bg=self.bg).grid(row=Ro, column=Col)  
             Ro+=4
-#            self.CBB1=Checkbutton(master, text=" Bypass", variable=self.ByPass, anchor = Anchor, width = Width-4).grid(row=Ro, column=Col)
             
         #Column 1 Input values
             Col += 1
@@ -101,64 +107,77 @@ class MainInt:
             Height = 5
             Anchor = 'e'
             Ro+=1
-            self.input_project_name = Entry(master, font = "Arial 8 bold", width = 60)
+            self.input_project_name = Entry(master, font = "Arial 8 bold", width = 60,
+                                            bg = self.bg_clear)
             self.input_project_name.grid(row=Ro, column=Col, columnspan=2, sticky='w')
             Ro+=1
-            self.Input_project_notes = Text(master, font = "Arial 8", width = Width, height = Height)
+            self.Input_project_notes = Text(master, font = "Arial 8", width = Width,
+                                            height = Height, bg = self.bg_clear)
             self.Input_project_notes.grid(row=Ro, column=Col, columnspan=6, sticky=Anchor)
             Width = 15
             Ro+=1
-            self.LblHead2 = Label(master, text="User Input").grid(row=Ro, column=Col)
+            self.LblHead2 = Label(master, text="User Input", bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.input_Nordic_Lam_type_1 = ttk.Combobox(master, values=(fu.tbNL.SeriesName()),width=Width)
+            self.input_Nordic_Lam_type_1 = ttk.Combobox(master, values=(fu.tbNL.SeriesName()),
+                                                        width=Width)
             self.input_Nordic_Lam_type_1.grid(row=Ro, column=Col)
             self.input_Nordic_Lam_type_1.insert(0,fu.tbNL.SeriesName()[1])
             Ro+=1            
-            self.input_Nordic_Lam_ply_quantity_1_1 = ttk.Combobox(master, values=(1,2,3,4),width=Width)
+            self.input_Nordic_Lam_ply_quantity_1_1 = ttk.Combobox(master, values=(1,2,3,4),
+                                                                  width=Width)
             self.input_Nordic_Lam_ply_quantity_1_1.grid(row=Ro, column=Col)
             self.input_Nordic_Lam_ply_quantity_1_1.insert(0,1)
             Ro+=1            
-            self.input_Nordic_Lam_thickness_2 = ttk.Combobox(master, values=(self.Nordic_Lam_thickness_List),width=Width)
+            self.input_Nordic_Lam_thickness_2 = ttk.Combobox(master,
+                                                             values=(self.Nordic_Lam_thickness_List),
+                                                             width=Width)
             self.input_Nordic_Lam_thickness_2.grid(row=Ro, column=Col)
             self.input_Nordic_Lam_thickness_2.insert(0,self.Nordic_Lam_thickness_List[0])
             Ro+=1            
-            self.input_Nordic_Lam_depth_3 = ttk.Combobox(master, values=(self.Nordic_Lam_depth_List),width=Width)
+            self.input_Nordic_Lam_depth_3 = ttk.Combobox(master,
+                                                         values=(self.Nordic_Lam_depth_List),
+                                                         width=Width)
             self.input_Nordic_Lam_depth_3.grid(row=Ro, column=Col)
             self.input_Nordic_Lam_depth_3.insert(0,self.Nordic_Lam_depth_List[1])
             Ro+=1            
-            self.input_hole_diameter_4 = Entry(master, width = Width+3)
+            self.input_hole_diameter_4 = Entry(master, width = Width+3, bg = self.bg_clear)
             self.input_hole_diameter_4.grid(row=Ro, column=Col)
             if self.selected_unit.get() == self.Units[0]:
                 self.input_hole_diameter_4.insert(0,4)
             else:
                 self.input_hole_diameter_4.insert(0,25.4)
             Ro+=1            
-            self.input_bending_force_Mf_5 = Entry(master, width = Width+3)
+            self.input_bending_force_Mf_5 = Entry(master, width = Width+3, bg = self.bg_clear)
             self.input_bending_force_Mf_5.grid(row=Ro, column=Col)
             Ro+=1            
-            self.input_bending_resistance_Mr_6 = Entry(master, width = Width+3)
+            self.input_bending_resistance_Mr_6 = Entry(master, width = Width+3, bg = self.bg_clear)
             self.input_bending_resistance_Mr_6.grid(row=Ro, column=Col)
             Ro+=1            
-            self.input_shear_force_Vf_7 = Entry(master, width = Width+3)
+            self.input_shear_force_Vf_7 = Entry(master, width = Width+3, bg = self.bg_clear)
             self.input_shear_force_Vf_7.grid(row=Ro, column=Col)
             Ro+=1            
-            self.input_K_D_8 = ttk.Combobox(master, values=(0.65, 1.00, 1.15),width=Width)
+            self.input_K_D_8 = ttk.Combobox(master, values=(0.65, 1.00, 1.15),
+                                            width=Width)
             self.input_K_D_8.grid(row=Ro, column=Col)
             self.input_K_D_8.insert(0,1.00)
             Ro+=1            
-            self.input_K_H_9 = ttk.Combobox(master, values=(1.00, 1.10),width=Width)
+            self.input_K_H_9 = ttk.Combobox(master, values=(1.00, 1.10),
+                                            width=Width)
             self.input_K_H_9.grid(row=Ro, column=Col)
             self.input_K_H_9.insert(0,1.00)
             Ro+=1
             self.ShearMaxLength = StringVar() 
-            self.OutShearMaxLength = Label(master, textvariable=self.ShearMaxLength, width = Width).grid(row=Ro, column=Col)
+            self.OutShearMaxLength = Label(master, textvariable=self.ShearMaxLength,
+                                           width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1            
-            self.CBB2=Checkbutton(master, text=" Use shear equation 7.5.7.2 (a)", variable=self.shear_method_a_used).grid(row=Ro, column=Col, columnspan = 2)
+            self.CBB2=Checkbutton(master, text=" Use shear equation 7.5.7.2 (a)",
+                                  variable=self.shear_method_a_used,
+                                  bg=self.bg).grid(row=Ro, column=Col, columnspan = 2)
             Ro+=1            
-            self.input_shear_force_Wf_10 = Entry(master, width = Width+3)
+            self.input_shear_force_Wf_10 = Entry(master, width = Width+3, bg = self.bg_clear)
             self.input_shear_force_Wf_10.grid(row=Ro, column=Col)
             Ro+=1            
-            self.input_shear_resistance_Wr_11 = Entry(master, width = Width+3)
+            self.input_shear_resistance_Wr_11 = Entry(master, width = Width+3, bg = self.bg_clear)
             self.input_shear_resistance_Wr_11.grid(row=Ro, column=Col)
 
         #Column 2 Input Labels
@@ -167,130 +186,190 @@ class MainInt:
             Anchor = 'w'
             Ro+=1
             Ro+=1
-            Width = 32
+            Width = 36
             Ro+=1
-            self.LblHead1 = Label(master, text="Nordic Lam information", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.LblHead1 = Label(master, text="Nordic Lam information", anchor = Anchor,
+                                  width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.Lbl_input_Nordic_Lam_type_1 = Label(master, text="Nordic Lam Type (NPG = Architectural)", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.Lbl_input_Nordic_Lam_type_1 = Label(master,
+                                                     text="Nordic Lam Type (NPG = Architectural)",
+                                                     anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.Lbl_input_Nordic_Lam_ply_quantity_1_1 = Label(master, text="Number of plies", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.Lbl_input_Nordic_Lam_ply_quantity_1_1 = Label(master, text="Number of plies",
+                                                               anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
             self.LblInput2Txt = StringVar()
-            self.LblInput2 = Label(master, textvariable=self.LblInput2Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.LblInput2 = Label(master, textvariable=self.LblInput2Txt, anchor = Anchor,
+                                   width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.ID2 = 'Nordic_Lam_thickness'
-            self.Lbl2 = self.ID2+", Nordic Lam  single ply width, "
+            self.Lbl2 = "Nordic Lam single ply thickness, "
             self.LblInput2Txt.set(self.Lbl2+self.UnitDict[self.ID2][self.selected_unit_index])
             Ro+=1
             self.Lbl_input_Nordic_Lam_depth_3_Txt = StringVar()
-            self.Lbl_input_Nordic_Lam_depth_3 = Label(master, textvariable=self.Lbl_input_Nordic_Lam_depth_3_Txt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.Lbl_input_Nordic_Lam_depth_3 = Label(master,
+                                                      textvariable=self.Lbl_input_Nordic_Lam_depth_3_Txt,
+                                                      anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.ID3 = 'Nordic_Lam_depth'
-            self.Lbl3 = self.ID3+", Nordic Lam  depth, "
+            self.Lbl3 = "Nordic Lam  depth, "
             self.Lbl_input_Nordic_Lam_depth_3_Txt.set(self.Lbl3+self.UnitDict[self.ID3][self.selected_unit_index])
             Ro+=1 
             self.label_input_hole_diameter_4_text = StringVar()
-            self.label_input_hole_diameter_4 = Label(master, textvariable=self.label_input_hole_diameter_4_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_hole_diameter_4 = Label(master,
+                                                     textvariable=self.label_input_hole_diameter_4_text,
+                                                     anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.ID4 = 'hole_diameter'
-            self.Lbl4 = self.ID4+", Hole diameter, "
+            self.Lbl4 = "Hole diameter, "
             self.label_input_hole_diameter_4_text.set(self.Lbl4+self.UnitDict[self.ID4][self.selected_unit_index])
             Ro+=1 
             self.label_input_bending_force_Mf_5_text = StringVar()
-            self.label_input_bending_force_Mf_5 = Label(master, textvariable=self.label_input_bending_force_Mf_5_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_bending_force_Mf_5 = Label(master,
+                                                        textvariable=self.label_input_bending_force_Mf_5_text,
+                                                        anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.ID5 = 'bending_force_Mf'
-            self.Lbl5 = self.ID5+", Moment force at opening, "
+            self.Lbl5 = "Moment force at opening (Mf), "
             self.label_input_bending_force_Mf_5_text.set(self.Lbl5+self.UnitDict[self.ID5][self.selected_unit_index])
             Ro+=1
             self.label_input_bending_resistance_Mr_6_text = StringVar()
-            self.label_input_bending_resistance_Mr_6 = Label(master, textvariable=self.label_input_bending_resistance_Mr_6_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_bending_resistance_Mr_6 = Label(master,
+                                                             textvariable=self.label_input_bending_resistance_Mr_6_text,
+                                                             anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.ID6 = 'bending_resistance_Mr'
-            self.Lbl6 = self.ID6+", Full section moment resistance, "
+            self.Lbl6 = "Moment resistance (Mr), "
             self.label_input_bending_resistance_Mr_6_text.set(self.Lbl6+self.UnitDict[self.ID6][self.selected_unit_index])
             Ro+=1
             self.label_input_shear_force_Vf_7_text = StringVar()
-            self.label_input_shear_force_Vf_7 = Label(master, textvariable=self.label_input_shear_force_Vf_7_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_shear_force_Vf_7 = Label(master,
+                                                      textvariable=self.label_input_shear_force_Vf_7_text,
+                                                      anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.ID7 = 'shear_force_Vf'
-            self.Lbl7 = self.ID7+", Longitudinal shear 7.5.7.2 (b), "
+            self.Lbl7 = "Longitudinal shear (Vf) 7.5.7.2 (b), "
             self.label_input_shear_force_Vf_7_text.set(self.Lbl7+self.UnitDict[self.ID7][self.selected_unit_index])
             Ro+=1
-            self.label_input_K_D_8 = Label(master, text="KD, duration factor", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_K_D_8 = Label(master, text="KD, duration factor",
+                                           anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.label_input_K_H_9 = Label(master, text="KH, humidity factor", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_K_H_9 = Label(master, text="KH, humidity factor",
+                                           anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
             self.LblOutShearMaxLengthTxt = StringVar()
-            self.LblOutShearMaxLength = Label(master, textvariable=self.LblOutShearMaxLengthTxt, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.LblOutShearMaxLength = Label(master, textvariable=self.LblOutShearMaxLengthTxt,
+                                              anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.IDOutShearMaxLength = 'max_beam_length'
-            self.LblShearMaxLength = self.IDOutShearMaxLength+" to use 7.5.7.2 (b), "
+            self.LblShearMaxLength = "Length to use 7.5.7.2 (b), "
             self.LblOutShearMaxLengthTxt.set(self.LblShearMaxLength+self.UnitDict[self.IDOutShearMaxLength][self.selected_unit_index])
             Ro+=2
             self.label_input_shear_force_Wf_10_text = StringVar()
-            self.label_input_shear_force_Wf_10 = Label(master, textvariable=self.label_input_shear_force_Wf_10_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_shear_force_Wf_10 = Label(master,
+                                                       textvariable=self.label_input_shear_force_Wf_10_text,
+                                                       anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.ID10 = 'shear_force_Wf'
-            self.Lbl10 = self.ID10+", Longitudinal shear 7.5.7.2 (a), "
+            self.Lbl10 = "Longitudinal shear (Wf) 7.5.7.2 (a), "
             self.label_input_shear_force_Wf_10_text.set(self.Lbl10+self.UnitDict[self.ID10][self.selected_unit_index])
             Ro+=1
             self.label_input_shear_resistance_Wr_11_text = StringVar()
-            self.label_input_shear_resistance_Wr_11 = Label(master, textvariable=self.label_input_shear_resistance_Wr_11_text, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.label_input_shear_resistance_Wr_11 = Label(master,
+                                                            textvariable=self.label_input_shear_resistance_Wr_11_text,
+                                                            anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)
             self.ID11 = 'shear_resistance_Wr'
-            self.Lbl11 = self.ID11+", Shear resistance 7.5.7.2 (a), "
+            self.Lbl11 = "Shear resistance (Wr) 7.5.7.2 (a), "
             self.label_input_shear_resistance_Wr_11_text.set(self.Lbl11+self.UnitDict[self.ID11][self.selected_unit_index])
 
         #Column 3 Output labels
             Col += 1
             Ro = 3
-            Width = 36
+            Width = 28
             Anchor = 'e'
-            self.LblHead3 = Label(master, text="Analysis", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.LblHead3 = Label(master, text="Analysis", anchor = Anchor, width = Width,
+                                  bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.LblInput301 = Label(master, text="Bending", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.LblInput301 = Label(master, text="Bending", anchor = Anchor, width = Width,
+                                     bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.LblInput302 = Label(master, text="Shear", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.LblInput302 = Label(master, text="Shear", anchor = Anchor, width = Width,
+                                     bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.LblInput303 = Label(master, text="Tension perpendicular to fibers", anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.LblInput303 = Label(master, text="Tension perpendicular to fibers",
+                                     anchor = Anchor, width = Width,
+                                     bg=self.bg).grid(row=Ro, column=Col)
 
         #Column 4 Output Force
             Col += 1
             Ro = 0
             Width = 10
             Ro+=3
-            self.LblHead4 = Label(master, text="Force").grid(row=Ro, column=Col)
+            self.LblHead4 = Label(master, text="Force", bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
             self.Out401bending_force_Mf = StringVar()
-            self.Out401 = Label(master, textvariable=self.Out401bending_force_Mf, width = Width).grid(row=Ro, column=Col)
+            self.Out401 = Label(master, textvariable=self.Out401bending_force_Mf,
+                                width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
             self.Out402Vf = StringVar()
-            self.Out402 = Label(master, textvariable=self.Out402Vf, width = Width).grid(row=Ro, column=Col)
+            self.Out402 = Label(master, textvariable=self.Out402Vf, width = Width,
+                                bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
             self.Out403_tension_strain_perpendicular = StringVar()
-            self.Out403 = Label(master, textvariable=self.Out403_tension_strain_perpendicular, width = Width).grid(row=Ro, column=Col)
+            self.Out403 = Label(master, textvariable=self.Out403_tension_strain_perpendicular,
+                                width = Width, bg=self.bg).grid(row=Ro, column=Col)
             
             Ro+=2
             Anchor = 'w'
-            self.RB1=Radiobutton(master, text=self.Units[0], variable=self.selected_unit, value=self.Units[0], command=self.Radio, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB1=Radiobutton(master, text=self.Units[0],
+                                 variable=self.selected_unit, value=self.Units[0],
+                                 command=self.Radio, anchor = Anchor, width = Width,
+                                 bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.RB2=Radiobutton(master, text=self.Units[1], variable=self.selected_unit, value=self.Units[1], command=self.Radio, anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB2=Radiobutton(master, text=self.Units[1],
+                                 variable=self.selected_unit, value=self.Units[1],
+                                 command=self.Radio, anchor = Anchor, width = Width,
+                                 bg=self.bg).grid(row=Ro, column=Col)
             Ro+=2
-            self.RB4=Radiobutton(master, text=self.calc_methods[0], variable=self.selected_calc_method, value=self.calc_methods[0], command = lambda : print(self.selected_calc_method.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB4=Radiobutton(master, text=self.calc_methods[0],
+                                 variable=self.selected_calc_method,
+                                 value=self.calc_methods[0],
+                                 command = lambda : print(self.selected_calc_method.get()),
+                                 anchor = Anchor, width = Width,
+                                 bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.RB5=Radiobutton(master, text=self.calc_methods[1], variable=self.selected_calc_method, value=self.calc_methods[1], command = lambda : print(self.selected_calc_method.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB5=Radiobutton(master, text=self.calc_methods[1],
+                                 variable=self.selected_calc_method,
+                                 value=self.calc_methods[1],
+                                 command = lambda : print(self.selected_calc_method.get()),
+                                 anchor = Anchor, width = Width,
+                                 bg=self.bg).grid(row=Ro, column=Col)
             Ro+=2
-            self.RB7=Radiobutton(master, text=self.reinforcement_types[0], variable=self.reinforcement_type, value=self.reinforcement_types[0], command = lambda : print(self.reinforcement_type.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB7=Radiobutton(master, text=self.reinforcement_types[0],
+                                 variable=self.reinforcement_type,
+                                 value=self.reinforcement_types[0],
+                                 command = lambda : print(self.reinforcement_type.get()),
+                                 anchor = Anchor, width = Width,
+                                 bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.RB8=Radiobutton(master, text=self.reinforcement_types[1], variable=self.reinforcement_type, value=self.reinforcement_types[1], command = lambda : print(self.reinforcement_type.get()), anchor = Anchor, width = Width).grid(row=Ro, column=Col)
+            self.RB8=Radiobutton(master, text=self.reinforcement_types[1],
+                                 variable=self.reinforcement_type,
+                                 value=self.reinforcement_types[1],
+                                 command = lambda : print(self.reinforcement_type.get()),
+                                 anchor = Anchor, width = Width,
+                                 bg=self.bg).grid(row=Ro, column=Col)
 
         #Column 5 Output Resistance
             Col += 1
             Ro = 0
             Width = 10
             Ro+=3
-            self.LblHead5 = Label(master, text="Resistance").grid(row=Ro, column=Col)
+            self.LblHead5 = Label(master, text="Resistance", bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
             self.Out501_reduced_bending_resistance = StringVar()
-            self.Out501 = Label(master, textvariable=self.Out501_reduced_bending_resistance, width = Width).grid(row=Ro, column=Col)
+            self.Out501 = Label(master, textvariable=self.Out501_reduced_bending_resistance,
+                                width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
             self.Out502CVr = StringVar()
-            self.Out502 = Label(master, textvariable=self.Out502CVr, width = Width).grid(row=Ro, column=Col)
+            self.Out502 = Label(master, textvariable=self.Out502CVr,
+                                width = Width, bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
             self.Out503_tension_strain_perpendicular_resistance = StringVar()
-            self.Out503 = Label(master, textvariable=self.Out503_tension_strain_perpendicular_resistance, width = Width).grid(row=Ro, column=Col)
+            self.Out503 = Label(master,
+                                textvariable=self.Out503_tension_strain_perpendicular_resistance,
+                                width = Width, bg=self.bg).grid(row=Ro, column=Col)
 
         #Reinforcement Output            
             Ro+=10
@@ -298,34 +377,43 @@ class MainInt:
             ColumnSpan = 2
             Anchor = 'e'
             self.Out6R1T = StringVar()
-            self.Out6R1 = Label(master, textvariable=self.Out6R1T, width = Width, anchor = Anchor).grid(row=Ro, column=Col, columnspan=ColumnSpan)  
+            self.Out6R1 = Label(master, textvariable=self.Out6R1T,
+                                width = Width, anchor = Anchor,
+                                bg=self.bg).grid(row=Ro, column=Col, columnspan=ColumnSpan)  
             
         #Column 6 Evaluations
             Col += 1
             Ro = 3
             Width = 14
-            self.LblHead5 = Label(master, text="Force/Resist").grid(row=Ro, column=Col)
+            self.LblHead5 = Label(master, text="Force/Resist", bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1            
             self.Out601B = StringVar()
-            self.Out601 = Label(master, textvariable=self.Out601B, width = Width).grid(row=Ro, column=Col)
+            self.Out601 = Label(master, textvariable=self.Out601B, width = Width,
+                                bg=self.bg).grid(row=Ro, column=Col)
 
             Ro+=1            
             self.Out602V = StringVar()
-            self.Out602 = Label(master, textvariable=self.Out602V, width = Width).grid(row=Ro, column=Col)
+            self.Out602 = Label(master, textvariable=self.Out602V, width = Width,
+                                bg=self.bg).grid(row=Ro, column=Col)
 
             Ro+=1            
             self.Out603TP = StringVar()
-            self.Out603 = Label(master, textvariable=self.Out603TP, width = Width).grid(row=Ro, column=Col)
+            self.Out603 = Label(master, textvariable=self.Out603TP, width = Width,
+                                bg=self.bg).grid(row=Ro, column=Col)
 
         #Buttons
             Ro+=2            
-            self.Button1 = Button(master, text='Analyze', command=self.InputProcess, width = Width).grid(row=Ro, column=Col)
+            self.Button1 = Button(master, text='Analyze', command=self.InputProcess,
+                                  width = Width, bg=self.But_bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.Button2 = Button(master, text='Analyze & Report', command=self.general_report, width = Width).grid(row=Ro, column=Col)
+            self.Button2 = Button(master, text='Analyze & Report', command=self.general_report,
+                                  width = Width, bg=self.But_bg).grid(row=Ro, column=Col)
             Ro+=2
-            self.Button3 = Button(master, text='Reference & Info', command=self.OpenFile, width = Width).grid(row=Ro, column=Col)
+            self.Button3 = Button(master, text='Reference & Info', command=self.OpenFile,
+                                  width = Width, bg=self.But_bg).grid(row=Ro, column=Col)
             Ro+=3
-            self.Button4 = Button(master, text='Reinforce', command=self.Reinforcement, width = Width).grid(row=Ro, column=Col)
+            self.Button4 = Button(master, text='Reinforce', command=self.Reinforcement,
+                                  width = Width, bg=self.But_bg).grid(row=Ro, column=Col)
             
             if os.getlogin() == PowerUser:
                 self.input_Nordic_Lam_type_1.delete(0,END)
@@ -684,6 +772,8 @@ class MainInt:
             self.ASSY_ScrewWindow .wm_title("Repair parameters")
             self.ASSY_ScrewWindow .wm_geometry('720x250')
             self.ASSY_ScrewWindow .wm_iconbitmap(bitmap=icon)
+            self.ASSY_ScrewWindow.configure(bg=self.bg)
+
         # Border buffer
             Col = 0
             Ro = 0
@@ -697,16 +787,21 @@ class MainInt:
             screw_types = 5 #Quantity of different screw types in the table. Screw types should be the first entries in the tables.
             self.LblCol0 = Label(self.ASSY_ScrewWindow , text="User Input", anchor = 'c').grid(row=Ro, column=Col)       
             Ro+=1
-            self.ScrewInput1 = Entry(self.ASSY_ScrewWindow, font = "Arial 8 bold", width = Width)
+            self.ScrewInput1 = Entry(self.ASSY_ScrewWindow, font = "Arial 8 bold",
+                                     width = Width, bg = self.bg_clear)
             self.ScrewInput1.grid(row=Ro, column=Col, sticky=Anchor)
             self.ScrewInput1.insert(0,1)
             Ro+=1
-            self.ScrewInput2 = ttk.Combobox(self.ASSY_ScrewWindow, values=(Rfu.tblNLRS.SeriesName()[0:screw_types]), width=Width-3)
+            self.ScrewInput2 = ttk.Combobox(self.ASSY_ScrewWindow,
+                                            values=(Rfu.tblNLRS.SeriesName()[0:screw_types]),
+                                            width=Width-3)
             self.ScrewInput2.grid(row=Ro, column=Col, sticky=Anchor)
             self.ScrewInput2.current(None)
             self.ScrewInput2.bind("<<ComboboxSelected>>",self.screw_user_selection)
             Ro+=1
-            self.hole_vertical_offset_input_3 = Entry(self.ASSY_ScrewWindow, font = "Arial 8 bold", width = Width)
+            self.hole_vertical_offset_input_3 = Entry(self.ASSY_ScrewWindow,
+                                                      font = "Arial 8 bold",
+                                                      width = Width, bg = self.bg_clear)
             self.hole_vertical_offset_input_3.grid(row=Ro, column=Col, sticky=Anchor)
             self.hole_vertical_offset_input_3.insert(0,0)
 
@@ -720,21 +815,28 @@ class MainInt:
         #Column 0 Buttons
             Columnspan=2
             Ro+=4            
-            self.ScrewButton1 = Button(self.ASSY_ScrewWindow, text='Analyze', command=self.ASSY_ScrewCal, width = Width).grid(row=Ro, column=Col,columnspan=Columnspan)
+            self.ScrewButton1 = Button(self.ASSY_ScrewWindow, text='Analyze',
+                                       command=self.screw_reinforcement_analysis,
+                                       width = Width, bg=self.But_bg).grid(row=Ro, column=Col,columnspan=Columnspan)
             Ro+=1
-            self.ScrewButton2 = Button(self.ASSY_ScrewWindow, text='Analyze & Report', command=self.ReportScrew, width = Width).grid(row=Ro, column=Col,columnspan=Columnspan)
+            self.ScrewButton2 = Button(self.ASSY_ScrewWindow, text='Analyze & Report',
+                                       command=self.screw_reinforcement_report,
+                                       width = Width, bg=self.But_bg).grid(row=Ro, column=Col,columnspan=Columnspan)
             
             
         #Column 1 Input Labels
             Col += 1
             Ro = 1
-            Width = 20
+            Width = 22
             Anchor = 'w'
-            self.LblIn1 = Label(self.ASSY_ScrewWindow , text="Screw/ply on one side of hole", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.LblIn1 = Label(self.ASSY_ScrewWindow , text="Screw/ply on one side of hole",
+                                anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
             Ro+=1
-            self.LblIn2 = Label(self.ASSY_ScrewWindow , text="Screw Type", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.LblIn2 = Label(self.ASSY_ScrewWindow , text="Screw Type",
+                                anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
             Ro+=1
-            self.LblIn3 = Label(self.ASSY_ScrewWindow , text="mm, Hole offset (max 10%)", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.LblIn3 = Label(self.ASSY_ScrewWindow , text="mm, Hole offset (max 10%)",
+                                anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
             Ro+=1
         
         
@@ -814,7 +916,10 @@ class MainInt:
                     if selected_key[0] == 'hole_vertical_offset' :
                         self.metric_data_dico[selected_key[0]]['value'] = abs(float(get_list[counter]))
                     else:
-                        self.metric_data_dico[selected_key[0]]['value'] = float(get_list[counter])
+                        try:
+                            self.metric_data_dico[selected_key[0]]['value'] = float(get_list[counter])
+                        except:
+                            self.metric_data_dico[selected_key[0]]['value'] = get_list[counter]
                 except:
                     self.metric_data_dico[selected_key[0]]['value'] = None
                 counter+=1
@@ -832,13 +937,17 @@ class MainInt:
 ###
 ### In progress
             ### Start updating this function. Handle None inputs.
-        def ASSY_ScrewCal(self):
+        def screw_reinforcement_analysis(self):
             '''
                 Evaluates the screw properties before calling the screw repair
                 All calculations in metric units
             '''
             self.InputProcess()
             self.screw_user_selection("<<ComboboxSelected>>")  
+# test
+            print('---------------------------------------------')
+            print(self.metric_data_dico['screw_type']['value'])
+            print(self.ScrewInput2.get())
 
 ### -_- Add screw repair info to the self.metric_data_dico and update the imperial_data_dico for the reports    
             
@@ -852,7 +961,8 @@ class MainInt:
 
             self.add_receptecals_to_data_dico(screw_repair_data_key_list)
 
-            if self.metric_data_dico['hole_vertical_offset']['value'] > (
+            if (self.metric_data_dico['hole_vertical_offset']['value'] != None and
+                self.metric_data_dico['hole_vertical_offset']['value']) > (
                     self.metric_data_dico['Nordic_Lam_depth']['value'] * 0.1):
                 messagebox.showinfo("Error Message",
                     f"Please correct the offset value: {self.metric_data_dico['hole_vertical_offset']['value']}mm"\
@@ -913,11 +1023,11 @@ class MainInt:
                 self.pass_data_from_metric_to_imperial_dico()
             return
         
-        def ReportScrew(self):
-            self.InputProcess()
+        def screw_reinforcement_report(self):
+            self.screw_reinforcement_analysis()
             Re.Report(self.dico_in_use(), 'templates\\NLSA_screw_reinforcement_report.xlsx')
             try:
-                if self.metric_data_dico['highest_screw_length']['value'] !=0: self.ASSY_ScrewWindow.destroy()
+                if self.metric_data_dico['highest_screw_length']['value'] > 0: self.ASSY_ScrewWindow.destroy()
             except:
                 print('highest_screw_length could not be calculated update interface information')
             pass
@@ -931,7 +1041,7 @@ class MainInt:
             self.Glued_PanelWindow = Toplevel(self.master)
             self.Glued_PanelWindow .wm_title("Repair parameters")
             self.Glued_PanelWindow .attributes('-topmost', True) 
-#            self.Glued_PanelWindow .transient(master=self.master) 
+            self.Glued_PanelWindow.configure(bg=self.bg)
             self.Glued_PanelWindow .wm_iconbitmap(bitmap=icon)
             panel_data_key_list = [
                                 ['panel_height','in','mm'],
@@ -994,9 +1104,13 @@ class MainInt:
             self.PanelOut2Var = StringVar()
             self.PanelOut2 = Label(self.Glued_PanelWindow, textvariable=self.PanelOut2Var, anchor = Anchor).grid(row=Ro, column=Col)       
             Ro+=1
-            self.PanelButton1 = Button(self.Glued_PanelWindow, text='Report', command=self.ReportPanel).grid(row=Ro, column=Col)
+            self.PanelButton1 = Button(self.Glued_PanelWindow, text='Report',
+                                       command=self.panel_reinforcement_report,
+                                       bg=self.But_bg).grid(row=Ro, column=Col)
             Ro+=2
-            self.PanelButton2 = Button(self.Glued_PanelWindow, text='Reference & Info', command=self.OpenFile).grid(row=Ro, column=Col)
+            self.PanelButton2 = Button(self.Glued_PanelWindow, text='Reference & Info',
+                                       command=self.OpenFile,
+                                       bg=self.But_bg).grid(row=Ro, column=Col)
             
             TextOut1Var = ('Repair detail based on two, full beam height, 3/4''"'' CSP'\
                            '\nplywood installed grain perpendicular to beam span'\
@@ -1021,7 +1135,7 @@ class MainInt:
             self.PanelOut1Var.set(TextOut1Var)
             self.PanelOut2Var.set(TextOut2Var)
             
-        def ReportPanel(self):
+        def panel_reinforcement_report(self):
             self.InputProcess()
             Re.Report(self.dico_in_use(), 'templates\\NLSA_panel_reinforcement_report.xlsx')
             self.Glued_PanelWindow.destroy()            
