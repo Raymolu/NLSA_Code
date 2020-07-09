@@ -683,7 +683,7 @@ class MainInt:
             self.ASSY_ScrewWindow = Toplevel(self.master)
             self.ASSY_ScrewWindow .wm_title("Repair parameters")
             self.ASSY_ScrewWindow .wm_geometry('720x250')
-            
+            self.ASSY_ScrewWindow .wm_iconbitmap(bitmap=icon)
         # Border buffer
             Col = 0
             Ro = 0
@@ -916,7 +916,10 @@ class MainInt:
         def ReportScrew(self):
             self.InputProcess()
             Re.Report(self.dico_in_use(), 'templates\\NLSA_screw_reinforcement_report.xlsx')
-            if self.metric_data_dico['highest_screw_length']['value'] !=0: self.ASSY_ScrewWindow.destroy()
+            try:
+                if self.metric_data_dico['highest_screw_length']['value'] !=0: self.ASSY_ScrewWindow.destroy()
+            except:
+                print('highest_screw_length could not be calculated update interface information')
             pass
 
 
@@ -927,8 +930,9 @@ class MainInt:
             '''
             self.Glued_PanelWindow = Toplevel(self.master)
             self.Glued_PanelWindow .wm_title("Repair parameters")
-            self.Glued_PanelWindow .attributes('-topmost', True)    
-
+            self.Glued_PanelWindow .attributes('-topmost', True) 
+#            self.Glued_PanelWindow .transient(master=self.master) 
+            self.Glued_PanelWindow .wm_iconbitmap(bitmap=icon)
             panel_data_key_list = [
                                 ['panel_height','in','mm'],
                                 ['panel_width','in','mm'],

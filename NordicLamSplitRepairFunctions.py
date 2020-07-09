@@ -145,6 +145,10 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,ply_width,h,hd,Met
     #Evaluate minimum spacing to avoid splitting
     ScrewEdSpa = 3 * ScrewTip # mm
     ScrewSpa = 2.5 * ScrewTip # mm
+    print('-----------------------------------------------')
+    print(ScrewEdSpa, ScrewQty, ply_width)
+    print(2 * ScrewEdSpa + ( ScrewQty - 1 ) * ScrewSpa > ply_width)
+
     if 2 * ScrewEdSpa + ( ScrewQty - 1 ) * ScrewSpa > ply_width:
         print('Impossible to fit all screws','Screw edge distance: ',ScrewEdSpa,' mm and screw spacing: ',ScrewSpa,' mm')
         messagebox.showinfo('Design Failure','Screw placement is invalid\nChange screw quantity')
