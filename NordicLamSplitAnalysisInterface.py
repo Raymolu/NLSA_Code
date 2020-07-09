@@ -15,12 +15,26 @@ import NordicLamSplitAnalysisFunctions as fu
 from NordicLamSplitRepairFunctions import try_round_NA
 import NordicLamSplitRepairFunctions as Rfu
 from UnitConversion import convert
+import sys
 import Report as Re
 import math as math
 
-icon = 'nordic_N.ico' #For exe version
+# Find if app is running from compiled exe or source code to set variable path.
+if getattr( sys, 'frozen', False ) :
+    icon = str(sys._MEIPASS)+'\\nordic_N.ico' #For exe version
+    HelpFile = str(sys._MEIPASS)+'\\NLSA_Reference.pdf' #For developement version
+    NLSA_screw_reinforcement_report_file = str(sys._MEIPASS)+'\\templates\\NLSA_screw_reinforcement_report.xlsx'
+    NLSA_panel_reinforcement_report_file = str(sys._MEIPASS)+'\\templates\\NLSA_panel_reinforcement_report.xlsx'
+    NLSA_general_report_file = str(sys._MEIPASS)+'\\templates\\NLSA_general_report.xlsx'
 
-
+else :
+    print('Interface running live')
+    icon = 'nordic_N.ico' #For developement version
+    HelpFile = 'NLSA_Reference.pdf' #For developement version
+    NLSA_screw_reinforcement_report_file = 'templates\\NLSA_screw_reinforcement_report.xlsx'
+    NLSA_panel_reinforcement_report_file = 'templates\\NLSA_panel_reinforcement_report.xlsx'
+    NLSA_general_report_file = 'templates\\NLSA_general_report.xlsx'
+    
 class MainInt:
         def __init__(self, master): #Calls the user interface
             
@@ -474,7 +488,7 @@ class MainInt:
             
         def OpenFile(self):
             #Opens the notes information and reference pdf
-            Re.os.startfile('NLSA_Reference.pdf')     
+            Re.os.startfile(HelpFile)     
 
         def InputProcess(self):
             print(str(Re.datetime.datetime.fromtimestamp(
@@ -777,7 +791,8 @@ class MainInt:
         # Border buffer
             Col = 0
             Ro = 0
-            self.Lblbuf = Label(self.ASSY_ScrewWindow , text="", width = 2).grid(row=Ro, column=Col)       
+            self.Lblbuf = Label(self.ASSY_ScrewWindow , text="", width = 2,
+                                bg=self.bg).grid(row=Ro, column=Col)       
 
         #Column 0 Input values & buttons
             Col += 1
@@ -785,7 +800,8 @@ class MainInt:
             Width = 18
             Anchor = 'w'
             screw_types = 5 #Quantity of different screw types in the table. Screw types should be the first entries in the tables.
-            self.LblCol0 = Label(self.ASSY_ScrewWindow , text="User Input", anchor = 'c').grid(row=Ro, column=Col)       
+            self.LblCol0 = Label(self.ASSY_ScrewWindow , text="User Input", anchor = 'c',
+                                 bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
             self.ScrewInput1 = Entry(self.ASSY_ScrewWindow, font = "Arial 8 bold",
                                      width = Width, bg = self.bg_clear)
@@ -807,9 +823,19 @@ class MainInt:
 
         #Column 0 Radio Buttons
             Ro+=2
-            self.RBSO1=Radiobutton(self.ASSY_ScrewWindow, text=self.screw_configurations[0], variable=self.screw_configuration, value=self.screw_configurations[0], command = lambda : print(self.reinforcement_type.get()), anchor = Anchor, width = Width-5).grid(row=Ro, column=Col)
+            self.RBSO1=Radiobutton(self.ASSY_ScrewWindow, text=self.screw_configurations[0],
+                                   variable=self.screw_configuration,
+                                   value=self.screw_configurations[0],
+                                   command = lambda : print(self.reinforcement_type.get()),
+                                   anchor = Anchor, width = Width-5,
+                                   bg=self.bg).grid(row=Ro, column=Col)
             Ro+=1
-            self.RBSO2=Radiobutton(self.ASSY_ScrewWindow, text=self.screw_configurations[1], variable=self.screw_configuration, value=self.screw_configurations[1], command = lambda : print(self.reinforcement_type.get()), anchor = Anchor, width = Width-5).grid(row=Ro, column=Col)
+            self.RBSO2=Radiobutton(self.ASSY_ScrewWindow, text=self.screw_configurations[1],
+                                   variable=self.screw_configuration,
+                                   value=self.screw_configurations[1],
+                                   command = lambda : print(self.reinforcement_type.get()),
+                                   anchor = Anchor, width = Width-5,
+                                   bg=self.bg).grid(row=Ro, column=Col)
 
 
         #Column 0 Buttons
@@ -830,13 +856,13 @@ class MainInt:
             Width = 22
             Anchor = 'w'
             self.LblIn1 = Label(self.ASSY_ScrewWindow , text="Screw/ply on one side of hole",
-                                anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+                                anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
             self.LblIn2 = Label(self.ASSY_ScrewWindow , text="Screw Type",
-                                anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+                                anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
             self.LblIn3 = Label(self.ASSY_ScrewWindow , text="mm, Hole offset (max 10%)",
-                                anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+                                anchor = Anchor, width = Width, bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
         
         
@@ -846,22 +872,33 @@ class MainInt:
             Ro = 0
             Width = 18
             Anchor = 'e'
-            self.LblCol3 = Label(self.ASSY_ScrewWindow , text="Output", anchor = Anchor, width = Width).grid(row=Ro, column=Col)  
+            self.LblCol3 = Label(self.ASSY_ScrewWindow , text="Output", anchor = Anchor,
+                                 width = Width, bg=self.bg).grid(row=Ro, column=Col)  
             Ro+=1
             self.ScrewOut1Var = StringVar()
-            self.ScrewOut1 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut1Var, anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewOut1 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut1Var,
+                                   anchor = Anchor, width = Width,
+                                   bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
             self.ScrewOut2Var = StringVar()
-            self.ScrewOut2 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut2Var, anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewOut2 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut2Var,
+                                   anchor = Anchor, width = Width,
+                                   bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1        
             self.ScrewOut3Var = StringVar()
-            self.ScrewOut3 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut3Var, anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewOut3 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut3Var,
+                                   anchor = Anchor, width = Width,
+                                   bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1        
             self.ScrewOut4Var = StringVar()
-            self.ScrewOut4 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut4Var, anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewOut4 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut4Var,
+                                   anchor = Anchor, width = Width,
+                                   bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1        
             self.ScrewOut5Var = StringVar()
-            self.ScrewOut5 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut5Var, anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewOut5 = Label(self.ASSY_ScrewWindow , textvariable=self.ScrewOut5Var,
+                                   anchor = Anchor, width = Width,
+                                   bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1         
 
         #Column 4 Output labels
@@ -869,17 +906,34 @@ class MainInt:
             Ro = 1
             Width = 60
             Anchor = 'w'
-            self.ScrewLblOut1 = Label(self.ASSY_ScrewWindow , text="Screw Factored Withdrawal Resistance, N/mm", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewLblOut1 = Label(self.ASSY_ScrewWindow ,
+                                      text="Screw Factored Withdrawal Resistance, N/mm",
+                                      anchor = Anchor, width = Width,
+                                      bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
-            self.ScrewLblOut2 = Label(self.ASSY_ScrewWindow , text="Screw Factored Tensile Strength, N", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewLblOut2 = Label(self.ASSY_ScrewWindow ,
+                                      text="Screw Factored Tensile Strength, N",
+                                      anchor = Anchor, width = Width,
+                                      bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1        
-            self.ScrewLblOut3 = Label(self.ASSY_ScrewWindow , text="Screw Tip length, mm", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewLblOut3 = Label(self.ASSY_ScrewWindow ,
+                                      text="Screw Tip length, mm", anchor = Anchor,
+                                      width = Width, bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1        
-            self.ScrewLblOut4 = Label(self.ASSY_ScrewWindow , text="Screw Length, mm (Note: Fully Threaded)", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewLblOut4 = Label(self.ASSY_ScrewWindow ,
+                                      text="Screw Length, mm (Note: Fully Threaded)",
+                                      anchor = Anchor, width = Width,
+                                      bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1        
-            self.ScrewLblOut5 = Label(self.ASSY_ScrewWindow , text="Tension perpendicular to wood fibre, N", anchor = Anchor, width = Width).grid(row=Ro, column=Col)       
+            self.ScrewLblOut5 = Label(self.ASSY_ScrewWindow ,
+                                      text="Tension perpendicular to wood fibre, N",
+                                      anchor = Anchor, width = Width,
+                                      bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=2         
-            self.ScrewLblOut6 = Label(self.ASSY_ScrewWindow , text="Only use fully threaded screws", anchor = Anchor, width = Width,font='arial 10 bold').grid(row=Ro, column=Col)       
+            self.ScrewLblOut6 = Label(self.ASSY_ScrewWindow ,
+                                      text="Only use fully threaded screws",
+                                      anchor = Anchor, width = Width, bg=self.bg,
+                                      font='arial 10 bold').grid(row=Ro, column=Col)       
             Ro+=1 
         
         def screw_user_selection(self,EO):
@@ -1025,7 +1079,7 @@ class MainInt:
         
         def screw_reinforcement_report(self):
             self.screw_reinforcement_analysis()
-            Re.Report(self.dico_in_use(), 'templates\\NLSA_screw_reinforcement_report.xlsx')
+            Re.Report(self.dico_in_use(), NLSA_screw_reinforcement_report_file)
             try:
                 if self.metric_data_dico['highest_screw_length']['value'] > 0: self.ASSY_ScrewWindow.destroy()
             except:
@@ -1051,9 +1105,6 @@ class MainInt:
                                 ['nail_row_spacing','in','mm']
                                 ]
             self.add_receptecals_to_data_dico(panel_data_key_list)
-#            for selected_key in panel_data_key_list:
-#                self.imperial_data_dico[selected_key[0]] = {'unit':selected_key[1],'value':None}
-#                self.metric_data_dico[selected_key[0]] =  {'unit':selected_key[2],'value':None}
 
             try:
                 (self.metric_data_dico['panel_height']['value'],
@@ -1074,35 +1125,25 @@ class MainInt:
                       f"{self.metric_data_dico['hole_diameter']['value']}")
 
             self.pass_data_from_metric_to_imperial_dico()
-
-#            for selected_key in self.metric_data_dico:
-#                self.imperial_data_dico[selected_key]['value'] = (
-#                        convert(
-#                                self.metric_data_dico[selected_key]['value'],
-#                                self.metric_data_dico[selected_key]['unit'],
-#                                self.imperial_data_dico[selected_key]['unit']))            
             
             data_dico  = self.dico_in_use()
             round_at = self.round_factor_in_use(2,1)
-#            if self.selected_unit.get().lower() == 'imperial':
-#                data_dico = self.imperial_data_dico
-#                round_at = 2
-#                
-#            elif self.selected_unit.get().lower() == 'metric':
-#                data_dico = self.metric_data_dico
-#                round_at = 1
             
         #Column 0 Input values & buttons
             Col = 0
             Ro = 0
             Anchor = 'w'
-            self.LblPan0 = Label(self.Glued_PanelWindow , text="Results", anchor = 'c').grid(row=Ro, column=Col)       
+            self.LblPan0 = Label(self.Glued_PanelWindow , text="Results",
+                                 anchor = 'c', bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
             self.PanelOut1Var = StringVar()
-            self.PanelOut1 = Label(self.Glued_PanelWindow, textvariable=self.PanelOut1Var, anchor = Anchor).grid(row=Ro, column=Col)       
+            self.PanelOut1 = Label(self.Glued_PanelWindow,
+                                   textvariable=self.PanelOut1Var,
+                                   anchor = Anchor, bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
             self.PanelOut2Var = StringVar()
-            self.PanelOut2 = Label(self.Glued_PanelWindow, textvariable=self.PanelOut2Var, anchor = Anchor).grid(row=Ro, column=Col)       
+            self.PanelOut2 = Label(self.Glued_PanelWindow, textvariable=self.PanelOut2Var,
+                                   anchor = Anchor, bg=self.bg).grid(row=Ro, column=Col)       
             Ro+=1
             self.PanelButton1 = Button(self.Glued_PanelWindow, text='Report',
                                        command=self.panel_reinforcement_report,
@@ -1137,27 +1178,14 @@ class MainInt:
             
         def panel_reinforcement_report(self):
             self.InputProcess()
-            Re.Report(self.dico_in_use(), 'templates\\NLSA_panel_reinforcement_report.xlsx')
+            Re.Report(self.dico_in_use(), NLSA_panel_reinforcement_report_file)
             self.Glued_PanelWindow.destroy()            
             pass
-#            try:
-#                ReinforceMethod = self.Reinforce.get()
-#                Input = self.InputProcess()
-#                #### Update with report based on unit type
-#                PanelData = (ReinforceMethod, 
-#                             self.metric_data_dico['panel_height']['Value'],
-#                             self.metric_data_dico['panel_width']['value'],
-#                             self.metric_data_dico['panel_nail_quantity']['value'])
-#                Input += PanelData
-#            except:
-#                print('invalid data')
-#            
-#            Re.Report(Input)
 
 #Generate an analysis and a report based on the inputed data.        
         def general_report(self):
             self.InputProcess()
-            Re.Report(self.dico_in_use(), 'templates\\NLSA_general_report.xlsx')
+            Re.Report(self.dico_in_use(), NLSA_general_report_file)
 #            Re.Report(selected_data_dico)
 
 #Convert input between imperial and international systems.

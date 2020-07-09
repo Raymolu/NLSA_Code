@@ -12,15 +12,11 @@ import NordicLamSplitAnalysisFunctions as fu
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Border, Side, Font
 from tkinter import messagebox
+import sys
 
-SheetNRep = 'Report'
 
-###-_-
-### Update: Add to selected deco the V or W values based on the Shear equation value. 
-# special Vf or Wf new var = 'shear_force', special Vr or Wr new var = 'shear_resistance', 
-### ADD shear_resistance_Vf
-
-report_file_path = 'reports\\'
+report_folder_name = 'reports'    
+report_file_path = report_folder_name+'\\' #For developement version
 report_sheet_name = 'report'
 
 def round_report_data(value):
@@ -48,6 +44,8 @@ def Report(selected_data_dico, template_file_path):
     '''
         Organizes the data dico information in a formated excel sheet.
     '''
+    os.mkdir(report_folder_name)
+    
     if selected_data_dico['shear_method_a_used']['value'] == 1:
         selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Wf']['value']
         selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Wf']['value']

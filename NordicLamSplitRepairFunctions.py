@@ -12,11 +12,17 @@ from tkinter import messagebox
 import math as math
 from UnitConversion import convert
 from NordicLamSplitAnalysisFunctions import try_catch
+import sys
 
-#import for tests only
-#import tkinter
 
-SpecFileName = "NLRepairSpecs.xlsx"
+# Find if app is running from compiled exe or source code to set variable path.
+if getattr( sys, 'frozen', False ) :
+    SpecFileName = str(sys._MEIPASS)+'\\NLRepairSpecs.xlsx' #For exe version
+
+else :
+    print('Interface running live')
+    SpecFileName = 'NLRepairSpecs.xlsx' #For developement version
+
 tblNLRS = XLTB.XLTable(1,SpecFileName)
 Spectbl = tblNLRS.GenDict()
 testvar = Spectbl['PLPremium']['GRes']

@@ -1,4 +1,4 @@
 Activate PyinstallerNJDA
 cd C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis\NLSA_Code
-pyinstaller ScriptBuilder_7_1_1.spec
+pyinstaller ScriptBuilder_.spec
 

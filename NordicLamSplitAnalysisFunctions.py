@@ -8,7 +8,18 @@ V 6.04 (2019-04-04)
 
 import XLProcessingTableClass as XLTB
 from tkinter import messagebox
+import sys
 
+
+# Find if app is running from compiled exe or source code to set variable path.
+if getattr( sys, 'frozen', False ) :
+    SpecFileName = str(sys._MEIPASS)+'\\NordicLamSpecs.xlsx' #For exe version
+
+else :
+    print('Interface running live')
+    SpecFileName = 'NordicLamSpecs.xlsx' #For developement version
+    
+    
 
 def try_catch(func):
     def wrapper(*args,**kwargs): 
@@ -21,7 +32,6 @@ def try_catch(func):
     return wrapper
 
 #Generate product spec object
-SpecFileName = "NordicLamSpecs.xlsx"
 tbNL = XLTB.XLTable(1,SpecFileName)
 #Maxh=406.4
 #Maxb=88.9
