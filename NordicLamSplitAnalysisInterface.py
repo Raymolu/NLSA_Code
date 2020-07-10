@@ -1116,7 +1116,8 @@ class MainInt:
                     self.metric_data_dico['tension_force_perpendicular']['value'],
                     self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
                     self.metric_data_dico['Nordic_Lam_depth']['value'],
-                    self.metric_data_dico['hole_diameter']['value']))
+                    self.metric_data_dico['hole_diameter']['value'],
+                    self.metric_data_dico['Nordic_Lam_thickness']['value']))
             except:
                 print('Panel repair function failed to load:\n'\
                       f"{self.metric_data_dico['tension_force_perpendicular']['value']}, "\

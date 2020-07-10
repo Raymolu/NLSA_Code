@@ -36,7 +36,7 @@ def try_round_NA(value, round_at=0):
     return value
 
 #Hole reinforcement with screws
-#@try_catch
+@try_catch
 def ScrewRepair(Tp,screw_quantity_per_ply,screw_pull_out_resistance,screw_tensile_resistance,
                 screw_tip,Ply,ply_width,h,hd,Method,
                 hole_vertical_offset):
@@ -174,7 +174,7 @@ def ScrewRepair(Tp,screw_quantity_per_ply,screw_pull_out_resistance,screw_tensil
 
 #Hole reinforcement with panels
 @try_catch
-def PanelRepair(Tp,Ply,h,hd):
+def PanelRepair(Tp,Ply,h,hd, Nordic_Lam_thickness):
     '''
         Tp: Tension perpendicular to wood fibres N (For all plies)
         Equation variables in N, N/mm2, N/mm, mm or N/nail.
@@ -222,6 +222,11 @@ def PanelRepair(Tp,Ply,h,hd):
         except:
             NailQty = None
     elif Ply == 2 or Ply == 3:
+        if Ply == 3 and Nordic_Lam_thickness >= 44.45:
+            Panel_h, Panel_w, NailQty = (None,)*3
+            messagebox.showinfo('Invalid input','3 ply Nordic Lam are too thick for a nailed panel reinforcement')
+            return Panel_h, Panel_w, NailQty, in_line_nail_spacing, nail_row_spacing
+        
         NailQty = math.ceil(Tp * PanelTpIncrease / (PanelQty * NailRes))
         nail_rows = math.floor(Corn_h/nail_row_spacing) -1
         if nail_rows == 0:
