@@ -1,0 +1,5 @@
+# Copy the spec file and edit the copy. Change the name in the code bellow
+Activate PyinstallerNJDA
+cd C:\Nordic\Projets\ProgramationDivers\NordicLamSplitAnalysis\NLSA_Code
+pyinstaller ScriptBuilder_OneFolder_.spec
+

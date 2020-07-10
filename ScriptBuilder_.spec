@@ -26,6 +26,7 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
+		  icon='nordic_N.ico',
           runtime_tmpdir=None,
           console=True )
 

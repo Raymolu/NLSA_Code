@@ -44,7 +44,10 @@ def Report(selected_data_dico, template_file_path):
     '''
         Organizes the data dico information in a formated excel sheet.
     '''
-    os.mkdir(report_folder_name)
+    try:
+        os.mkdir(report_folder_name)
+    except:
+        pass
     
     if selected_data_dico['shear_method_a_used']['value'] == 1:
         selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Wf']['value']

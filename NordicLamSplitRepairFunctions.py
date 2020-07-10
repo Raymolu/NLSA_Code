@@ -36,112 +36,125 @@ def try_round_NA(value, round_at=0):
     return value
 
 #Hole reinforcement with screws
-@try_catch
-def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,ply_width,h,hd,Method,Offset):
+#@try_catch
+def ScrewRepair(Tp,screw_quantity_per_ply,screw_pull_out_resistance,screw_tensile_resistance,
+                screw_tip,Ply,ply_width,h,hd,Method,
+                hole_vertical_offset):
     '''
         Tp: Tension perpendicular to wood fibres N (For all plies)
-        ScrewQty: number of screws per ply per side of hole. Note that all screws must be at the same distance of the opening.
-        ScrewResAbs: The tensil resistance of the screw. (Steel resistance in tension)
+        screw_quantity_per_ply: number of screws per ply per side of hole.
+        Note that all screws must be at the same distance of the opening.
+        screw_tensile_resistance: The tensil resistance of the screw. (Steel resistance in tension)
         
         Equation variables are in these metric units: N, N/mm or mm.
     '''
 
     # Tension perpendicular to grain offset effect factor.
-    if abs(Offset) <= 0.10*h and Offset != 0: # mm
-        print('Original tension force: ',round(Tp,2),'N')
+    if abs(hole_vertical_offset) <= 0.10*h and hole_vertical_offset != 0: # mm
+        print('Original tension force: ',try_round_NA(Tp,round_at=2),'N')
         Tp = Tp * (1 + hd/h)
         print('Tension force increased for Offset hole effect')
-        print('New tension force: ',round(Tp,2),'N')
-    elif Offset == 0:
+        print('New tension force: ',try_round_NA(Tp,round_at=2),'N')
+    elif hole_vertical_offset == 0:
         print('No hole offset considered')
     else:
-        messagebox.showinfo('Design Failure',str(round(Offset,2))+'mm offset should be corrected')
+        messagebox.showinfo('Design Failure',
+                            str(try_round_NA(hole_vertical_offset,round_at=2))+'mm offset should be corrected')
         Tp = None
         return None, None, None
 
     # Thread length calculations based on tension perpendicular to fibres    
-    ThreadL = Tp/(ScrewRes * ScrewQty * Ply)
-    print(round(ThreadL,2),'mm minimum thread length')
+    screw_thread_length = Tp/(screw_pull_out_resistance * screw_quantity_per_ply * Ply)
+    print(try_round_NA(screw_thread_length,round_at=2),'mm minimum thread length')
 
     # Screw Tip Left    
-    ScrewTL = max(ThreadL + ScrewTip,hd + 40 - 0.15*hd) # mm
-    if ScrewTL <= hd - 0.15*hd + (h-hd)/2 - Offset:
-        print(round(ScrewTL,2),'mm left screw tip side section')
+    left_screw_tip_section = max(screw_thread_length + screw_tip, hd + 40 - 0.15*hd) # mm
+    if left_screw_tip_section <= hd - 0.15*hd + (h-hd)/2 - hole_vertical_offset:
+        print(try_round_NA(left_screw_tip_section,round_at=2),'mm left screw tip side section')
     else:
-        print('ScrewTL Fail')
-        ScrewTL = None
+        print(f'left screw tip section {try_round_NA(left_screw_tip_section)}mm fails geometric criterion'\
+              f'\ngeometric criterion: <= {try_round_NA(hd - 0.15*hd + (h-hd)/2 - hole_vertical_offset)}')
+        left_screw_tip_section = None
 
     # Screw Head Left
-    ScrewHL = max((h-hd)/2 + Offset + 0.15*hd,ThreadL)
-    if ScrewHL <= (h-hd)/2 + Offset + 0.15*hd:
-        print(round(ScrewHL,2),'mm left screw head side section')
+    left_screw_head_section = max((h-hd)/2 + hole_vertical_offset + 0.15*hd,screw_thread_length)
+    if left_screw_head_section <= (h-hd)/2 + hole_vertical_offset + 0.15*hd:
+        print(try_round_NA(left_screw_head_section,round_at=2),'mm left screw head side section')
     else:
-        print('ScrewHL Fail')
-        ScrewHL = None
+        print(f'left screw head section {try_round_NA(left_screw_head_section)}mm fails geometric criterion'\
+              f'\ngeometric criterion: <= {try_round_NA((h-hd)/2 + hole_vertical_offset + 0.15*hd)}')
+        left_screw_head_section = None
     
 ### Same Side method (to test)
     if Method == 'Same Side':
 
         # Screw Tip Right
-        ScrewTR = max(ThreadL + ScrewTip, 40 + 0.15*hd) # mm
-        if ScrewTR <= (h-hd)/2 - Offset + 0.15*hd:
-            print(round(ScrewTR,2),'mm right screw tip side section')
+        right_screw_tip_section = max(screw_thread_length + screw_tip, 40 + 0.15*hd) # mm
+        if right_screw_tip_section <= (h-hd)/2 - hole_vertical_offset + 0.15*hd:
+            print(try_round_NA(right_screw_tip_section,round_at=2),'mm right screw tip side section')
         else:
-            print('ScrewTR Fail')
-            ScrewTR = None
+            print(f'right screw tip section {try_round_NA(right_screw_tip_section)}mm fails geometric criterion'\
+              f'\ngeometric criterion: <= {try_round_NA((h-hd)/2 - hole_vertical_offset + 0.15*hd)}')
+            right_screw_tip_section = None
     
         # Screw Head Right
-        ScrewHR = h - (h-hd)/2 + Offset - 0.15*hd
-        if ScrewHR >= ThreadL:
-            print(round(ScrewHR,2),'mm right screw head side section')
+        right_screw_head_section = h - (h-hd)/2 + hole_vertical_offset - 0.15*hd
+        if right_screw_head_section >= screw_thread_length:
+            print(try_round_NA(right_screw_head_section,round_at=2),'mm right screw head side section')
         else:
-            print('ScrewHR Fail')
-            ScrewHR = None
+            print(f'right screw head section {try_round_NA(right_screw_head_section)}mm fails geometric criterion'\
+              f'\ngeometric criterion: >= {try_round_NA(screw_thread_length)}')
+            right_screw_head_section = None
 
 ### Opposed Side (to test)
     elif Method == 'Opposed Side':
 
         # Screw Tip Right
-        ScrewTR = max(ThreadL + ScrewTip, hd - 0.15*hd + 40) # mm
-        if ScrewTR <= (h-hd)/2 + Offset + hd - 0.15*hd:
-            print(round(ScrewTR,2),'mm right screw tip side section')
+        right_screw_tip_section = max(screw_thread_length + screw_tip, hd - 0.15*hd + 40) # mm
+        if right_screw_tip_section <= (h-hd)/2 + hole_vertical_offset + hd - 0.15*hd:
+            print(try_round_NA(right_screw_tip_section,round_at=2),'mm right screw tip side section')
         else:
-            print('ScrewTR Fail')
-            ScrewTR = None
+            print(f'right screw tip section {try_round_NA(right_screw_tip_section)}mm fails geometric criterion'\
+                 f'\ngeometric criterion: <= {try_round_NA((h-hd)/2 + hole_vertical_offset + hd - 0.15*hd)}')
+            right_screw_tip_section = None
 
         # Screw Head Right 
-        ScrewHR = max((h-hd)/2 - Offset + 0.15*hd,ThreadL)
-        if ScrewHR <= (h-hd)/2 - Offset + 0.15*hd:
-            print(round(ScrewHR,2),'mm right screw head side section')
+        right_screw_head_section = max((h-hd)/2 - hole_vertical_offset + 0.15*hd,screw_thread_length)
+        if right_screw_head_section <= (h-hd)/2 - hole_vertical_offset + 0.15*hd:
+            print(try_round_NA(right_screw_head_section,round_at=2),'mm right screw head side section')
         else:
-            print('ScrewHR Fail')
-            ScrewHR = None
+            print(f'right screw head section {try_round_NA(right_screw_head_section)}mm fails geometric criterion'\
+              f'\ngeometric criterion: <= {try_round_NA((h-hd)/2 - hole_vertical_offset + 0.15*hd)}')
+            right_screw_head_section = None
     else:
         messagebox.showinfo('Error message','Trouble with the screw orientation selection')
-        ScrewTL = None
-        ScrewHL = None
-        ScrewTR = None
-        ScrewHR = None
+        left_screw_tip_section, left_screw_head_section, right_screw_tip_section, right_screw_head_section = (None,)*4
         
     #Screw length calculation on left and right side of hole
-    ScrewL = ScrewTL + ScrewHL
-    ScrewR = ScrewTR + ScrewHR
-    print(round(ScrewL,2),' mm left screw length')
-    print(round(ScrewR,2),' mm right screw length')
-
-    MaxScrew = max(ScrewL,ScrewR)
-    print(round(MaxScrew,2),' mm design screw length')
-    
-    if MaxScrew <= h - 50: # mm
-        print(round(MaxScrew,4),' mm screw is within beam depth tolerance')
+    try:
+        ScrewL = left_screw_tip_section + left_screw_head_section
+        ScrewR = right_screw_tip_section + right_screw_head_section
+    except:
+        ScrewL, ScrewR = (None,)*2
+        
+    print(try_round_NA(ScrewL,round_at=2),' mm left screw length')
+    print(try_round_NA(ScrewR,round_at=2),' mm right screw length')
+    if ScrewL != None and ScrewR!= None:
+        MaxScrew = max(ScrewL,ScrewR)
     else:
-        print(round(MaxScrew,4),' mm required screw is too long for the beam depth tolerance. Change screw type or quantity')
-        messagebox.showinfo('Design Failure',str(round(MaxScrew,2))+' mm required screw is too long for the beam depth tolerance.'
+        MaxScrew = None
+    print(try_round_NA(MaxScrew,round_at=2),' mm design screw length')
+    
+    if MaxScrew!= None and MaxScrew <= h - 50: # mm
+        print(try_round_NA(MaxScrew,round_at=4),' mm screw is within beam depth tolerance')
+    elif MaxScrew!= None:
+        print(try_round_NA(MaxScrew,round_at=4),' mm required screw is too long for the beam depth tolerance. Change screw type or quantity')
+        messagebox.showinfo('Design Failure',str(try_round_NA(MaxScrew,round_at=2))+' mm required screw is too long for the beam depth tolerance.'
                             +'\nChange screw type or quantity')
         MaxScrew = None
     
     #Validate Screw tensil strength is sufficient.
-    if ScrewResAbs * ScrewQty * Ply >= Tp:
+    if screw_tensile_resistance * screw_quantity_per_ply * Ply >= Tp:
         print('Screw tensil strenght can resist the tension perpendicular to wood fibres')
     else:
         print('Selected screw fails tensil resistance')
@@ -149,15 +162,15 @@ def ScrewRepair(Tp,ScrewQty,ScrewRes,ScrewResAbs,ScrewTip,Ply,ply_width,h,hd,Met
         return None, None, Tp
     
     #Evaluate minimum spacing to avoid splitting
-    ScrewEdSpa = 3 * ScrewTip # mm
-    ScrewSpa = 2.5 * ScrewTip # mm
+    ScrewEdSpa = 3 * screw_tip # mm
+    ScrewSpa = 2.5 * screw_tip # mm
 
-    if 2 * ScrewEdSpa + ( ScrewQty - 1 ) * ScrewSpa > ply_width:
+    if 2 * ScrewEdSpa + ( screw_quantity_per_ply - 1 ) * ScrewSpa > ply_width:
         print('Impossible to fit all screws','Screw edge distance: ',ScrewEdSpa,' mm and screw spacing: ',ScrewSpa,' mm')
         messagebox.showinfo('Design Failure','Screw placement is invalid\nChange screw quantity')
         MaxScrew = None
 
-    return MaxScrew, ThreadL, Tp
+    return MaxScrew, screw_thread_length, Tp
 
 #Hole reinforcement with panels
 @try_catch
@@ -189,7 +202,7 @@ def PanelRepair(Tp,Ply,h,hd):
 
     # Calculate minimum Glue area		
     GArea = Tp * PanelTpIncrease / (PanelQty * GlueRes * GlueEff)
-    print ('Glue required area to match tension force: ',round(GArea,2),' mm\N{SUPERSCRIPT TWO}')
+    print ('Glue required area to match tension force: ',try_round_NA(GArea,round_at=2),' mm\N{SUPERSCRIPT TWO}')
 	#Calculate plywood dimensions and Calcultate minimum number of nail required
 		#If one ply, the Nail quantity will be 1 nail / 5800mm2
     	#Minimum of width of panel = hd + 101.6mm
@@ -210,18 +223,22 @@ def PanelRepair(Tp,Ply,h,hd):
             NailQty = None
     elif Ply == 2 or Ply == 3:
         NailQty = math.ceil(Tp * PanelTpIncrease / (PanelQty * NailRes))
-        NRows = math.floor(Corn_h/nail_row_spacing) -1
-        NailQty_w = math.ceil(NailQty / NRows)
+        nail_rows = math.floor(Corn_h/nail_row_spacing) -1
+        if nail_rows == 0:
+            Panel_h, Panel_w, NailQty = (None,)*3
+            print(f"reinforcement depth {Corn_h}mm too small to accomodate for {nail_row_spacing}mm nail spacing")
+            return Panel_h, Panel_w, NailQty, in_line_nail_spacing, nail_row_spacing
+        NailQty_w = math.ceil(NailQty / nail_rows)
         NCorn_w = in_line_nail_spacing * (NailQty_w + 1)
         NArea = Corn_h * NCorn_w
         Panel_w1 = max(hd + 101.6, hd + NCorn_w * 2, hd + GCorn_w * 2)
 #        print('From nail resistance Panel width: ',Panel_w1)
-#        print('NailQty ',NailQty,'//NRows ',NRows,'//NailQty_w ',NailQty_w,'//NCorn_w ',NCorn_w,'//NArea ',NArea)
+#        print('NailQty ',NailQty,'//nail_rows ',nail_rows,'//NailQty_w ',NailQty_w,'//NCorn_w ',NCorn_w,'//NArea ',NArea)
 #        print('NailQty = math.ceil(Tp * PanelTpIncrease / (PanelQty * NailRes))',NailQty,Tp,PanelTpIncrease,PanelQty,NailRes)        
         print('Minimum nail quantity above and bellow the split area: ',NailQty)
         Panel_w = Panel_wCheck(Tp,PanelQty,h,hd,Panel_w1)
         print('The Panel Checkup width: ',try_round_NA(convert(Panel_w,'mm','m'),round_at=2),' m')
-        print ('Nail panel required area: ',round(NArea,2),' mm\N{SUPERSCRIPT TWO}')
+        print ('Nail panel required area: ',try_round_NA(NArea,round_at=2),' mm\N{SUPERSCRIPT TWO}')
         print('Nail spacing in mm: ',in_line_nail_spacing,' Row spacing: ',nail_row_spacing)
         try:
             NailQty = (math.floor(Panel_h/nail_row_spacing)-1) * (math.floor(Panel_w/in_line_nail_spacing)-1) - math.floor(hd/nail_row_spacing) * math.floor(hd/in_line_nail_spacing)
@@ -245,7 +262,7 @@ def Panel_wCheck(Tp,PanelQty,h,hd,Panel_w):
     PanelTStrength = tblNLRS.GenDict()['CSP18']['PanelTStr'] #N/mm 90 deg worst case, most comon 18.5mm CSP plywood 6 ply
     PanelTRes = Phi * PanelTStrength * (Panel_w - hd ) / 2
     
-    print('Panel tensil resistance for a ',round((Panel_w - hd ) / 2,2),'mm section: ',PanelTRes,'N')
+    print('Panel tensil resistance for a ',try_round_NA((Panel_w - hd ) / 2,round_at=2),'mm section: ',PanelTRes,'N')
 
     if Tp > PanelTRes * PanelQty:
         messagebox.showinfo('Info Message',"Panel was widened to resist tension")
@@ -258,9 +275,9 @@ def Panel_wCheck(Tp,PanelQty,h,hd,Panel_w):
     #Plywood rolling shear check. Ignored because the nails will help avoid it.
     #Panel restriction to disipate tension force	
     if Panel_w > 2 * h or Panel_w > 1220:
-        print('Panel width designed: ',round(Panel_w,2),' mm, 2 x beam depth: ',2*h,' mm, Panel too long:',Panel_w > 2 * h)
+        print('Panel width designed: ',try_round_NA(Panel_w,round_at=2),' mm, 2 x beam depth: ',2*h,' mm, Panel too long:',Panel_w > 2 * h)
         print('Panel width too long because greater than 1220mm',Panel_w > 1220)
-        messagebox.showinfo('Invalid result',str(round(Panel_w/1000,2)) + ' m panel is too long')
+        messagebox.showinfo('Invalid result',str(try_round_NA(Panel_w/1000,round_at=2)) + ' m panel is too long')
         Panel_w = None
     else:
         Panel_w = Panel_w
