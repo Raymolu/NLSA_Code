@@ -51,11 +51,11 @@ def Report(selected_data_dico, template_file_path):
     
     if selected_data_dico['shear_method_a_used']['value'] == 1:
         selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Wf']['value']
-        selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Wf']['value']
+        selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Wr']['value']
         selected_data_dico['shear_method_a_used_txt']['value'] = '(a) Wr'
     elif selected_data_dico['shear_method_a_used']['value'] == 0:
         selected_data_dico['shear_force']['value'] = selected_data_dico['shear_force_Vf']['value']
-        selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Vf']['value']    
+        selected_data_dico['shear_resistance']['value'] = selected_data_dico['shear_resistance_Vr']['value']    
         selected_data_dico['shear_method_a_used_txt']['value'] = '(b) Vr'
 
     Nordic_Lam_split_analyser_report_template = (

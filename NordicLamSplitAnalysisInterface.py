@@ -38,7 +38,7 @@ else :
 class MainInt:
         def __init__(self, master): #Calls the user interface
             
-            PowerUser = 'ludovicraymond'
+            PowerUser = ['ludovicraymond', 'migueladorta']
             self.master = master
             self.In=str()
             self.bg = '#c2b280' #Background Color for all GUI using the self variable
@@ -78,7 +78,7 @@ class MainInt:
             self.reinforcement_type.set(self.reinforcement_types[0])
             self.screw_configuration.set(self.screw_configurations[0])
             self.shear_method_a_used.set(0) 
-            if os.getlogin() == PowerUser:
+            if os.getlogin() in PowerUser:
                 self.selected_unit.set(self.Units[0])
             self.selected_unit_index = self.Units.index(self.selected_unit.get())
             self.Nordic_Lam_imperial_thickness_List = [1.75, 3.5]
@@ -429,7 +429,7 @@ class MainInt:
             self.Button4 = Button(master, text='Reinforce', command=self.Reinforcement,
                                   width = Width, bg=self.But_bg).grid(row=Ro, column=Col)
             
-            if os.getlogin() == PowerUser:
+            if os.getlogin() in PowerUser:
                 self.input_Nordic_Lam_type_1.delete(0,END)
                 self.input_Nordic_Lam_type_1.insert(0,fu.tbNL.SeriesName()[0])
                 self.reinforcement_type.set(self.reinforcement_types[1])
@@ -537,7 +537,7 @@ class MainInt:
                             ['Fv','psi','MPa'],
                             ['shear_force','lb','N'],
                             ['shear_resistance','lb','N'],
-                            ['shear_resistance_Vf','lb','N']
+                            ['shear_resistance_Vr','lb','N']
                             ]
 
             self.add_receptecals_to_data_dico(first_data_key_list)
@@ -610,7 +610,7 @@ class MainInt:
                 shear_evaluation_function = fu.S700_Eval
             
             try:
-                self.metric_data_dico['shear_resistance_Vf']['value'] = (
+                self.metric_data_dico['shear_resistance_Vr']['value'] = (
                          fu.shear_resistance_equation_b(
                             self.metric_data_dico['Nordic_Lam_type']['value'],
                             self.metric_data_dico['Nordic_Lam_depth']['value'],
@@ -620,7 +620,7 @@ class MainInt:
                             self.metric_data_dico['Nordic_Lam_ply_quantity']['value'],
                             )) # No hole and methode b to calculate Vr without reduction.
             except:
-                self.metric_data_dico['shear_resistance_Vf']['value'] = None
+                self.metric_data_dico['shear_resistance_Vr']['value'] = None
                 
             try:    
                 (self.metric_data_dico['bending_analysis_ratio']['value'],
@@ -683,6 +683,7 @@ class MainInt:
                     self.metric_data_dico['Nordic_Lam_depth']['value']
                     * self.metric_data_dico['Nordic_Lam_thickness']['value']))
                     / 1000, 2))
+
             self.max_length_to_use_shear_resistance_b = (
                     self.metric_data_dico['max_beam_length']['value']) # updates the gui variable
 
@@ -693,7 +694,8 @@ class MainInt:
             tension_strain_perpendicular_round_factor = self.round_factor_in_use(0,3)
 
             #Set the maximum length to be able to use shear equation 7.5.7.2 (b)
-            self.ShearMaxLength.set(str(round(data_dico['Nordic_Lam_depth']['value'],0)))
+### Add if radio button Imperial convert 
+            self.ShearMaxLength.set(str(round(data_dico['max_beam_length']['value'],0)))
 
             print('Residual Mr = ',
                   data_dico['reduced_bending_resistance']['value'],'; Residual shear resistance = ',
@@ -998,10 +1000,10 @@ class MainInt:
             '''
             self.InputProcess()
             self.screw_user_selection("<<ComboboxSelected>>")  
-# test
-            print('---------------------------------------------')
-            print(self.metric_data_dico['screw_type']['value'])
-            print(self.ScrewInput2.get())
+
+            # print('---------------------------------------------')
+            # print(self.metric_data_dico['screw_type']['value'])
+            # print(self.ScrewInput2.get())
 
 ### -_- Add screw repair info to the self.metric_data_dico and update the imperial_data_dico for the reports    
             
@@ -1265,8 +1267,7 @@ class MainInt:
                 InputList = [self.max_length_to_use_shear_resistance_b]
                 for i in InputList:
                     try:
-#                        print('This is SMLength: ',self.max_length_to_use_shear_resistance_b)
-                        self.max_length_to_use_shear_resistance_b = convert(float(self.max_length_to_use_shear_resistance_b),FUni2,SUni2)
+                        self.max_length_to_use_shear_resistance_b = convert(float(self.ShearMaxLength.get()),FUni2,SUni2)
                         self.ShearMaxLength.set(str(round(self.max_length_to_use_shear_resistance_b,0)))
                     except:
                         self.ShearMaxLength.set("")
