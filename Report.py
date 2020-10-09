@@ -91,12 +91,14 @@ def Report(selected_data_dico, template_file_path):
     #Add inforation
     if os.getlogin() == 'ludovicraymond':
         designer = 'Ludovic Raymond'
+    elif os.getlogin() == 'migueladorta':
+        designer = 'Miguel A Dorta'
     else:
         designer = os.getlogin()
     Notes = [('Project: ',selected_data_dico['project_name']['value']),
              ('Notes: ',selected_data_dico['Notes']['value']),
              ('Date: ', str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d'))),
-             ('Designer: ', designer)] 
+             ('Designer 7.01.9: ', designer)] 
     df1 = pd.DataFrame(data=Notes)
     df1.to_excel(writer, index=False, header=False, sheet_name=report_sheet_name, startrow = df.shape[0] + 1)
 

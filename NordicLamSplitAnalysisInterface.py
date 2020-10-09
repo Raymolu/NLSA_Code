@@ -92,7 +92,7 @@ class MainInt:
 
             self.RepList = []               
 
-            master.title("Nordic Lam Split Analyser")
+            master.title("Nordic Lam Split Analyser 7.01.9")
             master.geometry('1000x470')
 
         # Sets the repair windows to upper stack level.
